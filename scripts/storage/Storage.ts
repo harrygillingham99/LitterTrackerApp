@@ -9,10 +9,10 @@ export async function StoreData<T>(value: T, Key: string): Promise<void> {
   }
 }
 
-export async function GetData<T>(Key: string): Promise<T> {
+export async function GetData<T>(Key: string): Promise<T | null>  {
   try {
     const jsonValue = await AsyncStorage.getItem(Key);
-    return jsonValue != null ? JSON.parse(jsonValue) : null;
+    return jsonValue != null ? (JSON.parse(jsonValue) as T) : null;
   } catch (e) {
     throw new Error();
   }
