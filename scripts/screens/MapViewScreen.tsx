@@ -1,11 +1,11 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
-import { StatusBar } from "expo-status-bar";
+import { Dimensions, StyleProp, ViewStyle } from "react-native";
 import { AppHeader } from "../components/nav/Header";
 import { DrawerNavigationProp } from "@react-navigation/drawer";
 import { DrawerScreens } from "../types/nav/DrawerScreens";
 import { Routes } from "../types/nav/Routes";
 import { AppLogoIcon } from "../components/AppLogoIcon";
+import MapView from "react-native-maps";
 
 type MapViewScreenNavigationProp = DrawerNavigationProp<
   DrawerScreens,
@@ -18,22 +18,25 @@ type MapViewScreenProps = {
 
 export const MapViewScreen = (props: MapViewScreenProps) => {
   return (
-    <View style={styles.container}>
+    <>
       <AppHeader
         leftComponentOnPress={props.navigation.toggleDrawer}
         centerComponent={AppLogoIcon}
       />
-      <Text>Map HEre</Text>
-      <StatusBar style="auto" />
-    </View>
+      <MapView
+        provider={"google"}
+        style={BeachMapStyles}
+        region={undefined}
+        mapType={"hybrid"}
+        rotateEnabled={true}
+        showsTraffic={true}
+      ></MapView>
+    </>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});
+export const BeachMapStyles: StyleProp<ViewStyle> = {
+  width: Dimensions.get("window").width,
+  height: Dimensions.get("window").height,
+  flex: 1,
+};

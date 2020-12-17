@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Text } from "react-native";
 import { AppHeader } from "../components/nav/Header";
 import { DrawerScreens } from "../types/nav/DrawerScreens";
 import { Routes } from "../types/nav/Routes";
@@ -22,18 +22,7 @@ export const HomeScreen = (props: HomeScreenProps) => {
         leftComponentOnPress={props.navigation.toggleDrawer}
         centerComponent={AppLogoIcon}
       />
-      <View style={styles.container}>
-        <Text>Open up App.tsx to start working on your app!</Text>
-      </View>
+      <Text>Home</Text>
     </>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});

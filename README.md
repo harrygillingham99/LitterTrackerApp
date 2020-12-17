@@ -1,2 +1,3 @@
-# UbiComp-Assignment-2
-An Expo React Native 'Showcase' Assignment.
+# LitterTracker - UbiComp-Assignment-2
+
+A location based litter tracker application.
