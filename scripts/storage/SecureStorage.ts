@@ -5,18 +5,21 @@ export const IsAvailable = async () => await SecureStore.isAvailableAsync();
 export const DeleteItem = async (Key: string) =>
   await SecureStore.deleteItemAsync(Key);
 
-export async function SetItem<T>(Key: string, Value: T) {
+export async function SetItem<T>(key: string, value: T) {
   try {
-    await SecureStore.setItemAsync(Key, JSON.stringify(Value));
+    if (value === null || value === undefined) return;
+    await SecureStore.setItemAsync(key, JSON.stringify(value));
   } catch (e) {
-    throw new Error()
+    throw new Error();
   }
 }
 
-export async function GetItem<T>(Key: string): Promise<T> {
+export async function GetItem<T>(key: string): Promise<T | null> {
   try {
-    var result = await SecureStore.getItemAsync(Key);
-    return result != null ? JSON.parse(result) : null;
+    var jsonValue = await SecureStore.getItemAsync(key);
+    return jsonValue !== null && jsonValue !== undefined
+      ? (JSON.parse(jsonValue) as T)
+      : null;
   } catch (e) {
     throw new Error();
   }
