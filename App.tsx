@@ -5,27 +5,38 @@ import { HomeScreen } from "./scripts/screens/HomeScreen";
 import { Drawer } from "./scripts/components/nav/Drawer";
 import { MapViewScreen } from "./scripts/screens/MapViewScreen";
 import { SettingsScreen } from "./scripts/screens/SettingsScreen";
+import { FirebaseAuthProvider, IfFirebaseAuthed } from "@react-firebase/auth";
+import * as firebase from "firebase";
+import { firebaseConfig } from "./scripts/services/firebase/Firebase";
+import { NotLoggedInScreen } from "./scripts/screens/NotLoggedInScreen";
 
 export default function App() {
   return (
     <NavigationContainer>
-      <Drawer.Navigator initialRouteName={Routes.Home}>
-        <Drawer.Screen
-          name={Routes.Home}
-          component={HomeScreen}
-          options={{ title: Routes.Home }}
-        />
-        <Drawer.Screen
-          name={Routes.MapView}
-          component={MapViewScreen}
-          options={{ title: Routes.MapView }}
-        />
-        <Drawer.Screen
-          name={Routes.Settings}
-          component={SettingsScreen}
-          options={{ title: Routes.Settings }}
-        />
-      </Drawer.Navigator>
+      <FirebaseAuthProvider firebase={firebase} {...firebaseConfig}>
+        <Drawer.Navigator initialRouteName={Routes.Unauthenticated}>
+          <Drawer.Screen
+            name={Routes.Home}
+            component={HomeScreen}
+            options={{ title: Routes.Home }}
+          />
+          <Drawer.Screen
+            name={Routes.MapView}
+            component={MapViewScreen}
+            options={{ title: Routes.MapView }}
+          />
+          <Drawer.Screen
+            name={Routes.Settings}
+            component={SettingsScreen}
+            options={{ title: Routes.Settings }}
+          />
+          <Drawer.Screen
+            name={Routes.Unauthenticated}
+            component={NotLoggedInScreen}
+            options={{ title: "", gestureEnabled: false }}
+          />
+        </Drawer.Navigator>
+      </FirebaseAuthProvider>
     </NavigationContainer>
   );
 }

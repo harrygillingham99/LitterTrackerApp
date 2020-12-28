@@ -1,1 +1,1 @@
-export const HeadingColour = 'green'
+export const HeadingColour = '#008000'

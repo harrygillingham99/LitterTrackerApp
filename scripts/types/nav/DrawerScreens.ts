@@ -7,4 +7,5 @@ export type DrawerScreens = {
   Home: undefined;
   Settings: undefined;
   MapView: undefined;
+  Unauthenticated: undefined;
 };
