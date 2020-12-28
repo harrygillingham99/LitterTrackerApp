@@ -18,6 +18,7 @@ import {
   SignInWithEmailPassword,
 } from "../services/firebase/Firebase";
 import { HeadingColour } from "../styles/Colours";
+import { AppContainer } from "../state/AppState";
 
 type NotLoggedInNavigationProp = DrawerNavigationProp<
   DrawerScreens,
@@ -40,6 +41,7 @@ interface LoginScreenState {
 
 export const NotLoggedInScreen = (props: NotLoggedInScreenProps) => {
   const [state, setState] = useSetState<LoginScreenState>();
+  const { setAppState } = AppContainer.useContainer();
 
   const OnEmailAddressChange = (input: string) =>
     EmailIsValid(input)
@@ -75,9 +77,9 @@ export const NotLoggedInScreen = (props: NotLoggedInScreenProps) => {
       setState({ confirmPasswordErrorMessage: ErrorMessages.PasswordTooShort });
       return;
     }
-    CreateEmailAccount(state.emailAddress, state.password).then(() =>
-      props.navigation.navigate("Home")
-    );
+    CreateEmailAccount(state.emailAddress, state.password)
+      .then((res) => setAppState({ user: res.user ?? undefined }))
+      .then(() => props.navigation.navigate("Home"));
   };
 
   return (
@@ -89,7 +91,6 @@ export const NotLoggedInScreen = (props: NotLoggedInScreenProps) => {
       <Tile
         imageSrc={require("../../assets/stock.png")}
         title="Sign up to track your findings and compete with your friends!"
-        
       ></Tile>
       <View style={Container}>
         <Input
@@ -114,42 +115,49 @@ export const NotLoggedInScreen = (props: NotLoggedInScreenProps) => {
             secureTextEntry={true}
           />
         )}
-         <View style={{ flexDirection: "row", flex: 1 }}>
-        {!state.isCreatingAccount && (
-         
-            <><Button
-              title="Sign In"
-              buttonStyle={{ backgroundColor: HeadingColour, marginRight: 5 }}
-              onPress={() => SignInWithEmailPassword(
-                state.emailAddress,
-                state.password
-              ).then(() => props.navigation.navigate("Home"))}
-            ></Button>
+        <View style={{ flexDirection: "row", flex: 1 }}>
+          {!state.isCreatingAccount && (
+            <>
+              <Button
+                title="Sign In"
+                buttonStyle={{ backgroundColor: HeadingColour, marginRight: 5 }}
+                onPress={() =>
+                  SignInWithEmailPassword(state.emailAddress, state.password)
+                    .then((res) => setAppState({ user: res.user ?? undefined }))
+                    .then(() => props.navigation.navigate("Home"))
+                }
+              ></Button>
               <Button
                 title="Sign In As Guest"
                 buttonStyle={{ backgroundColor: HeadingColour, marginRight: 5 }}
-                onPress={() => SignInAnon().then(() => props.navigation.navigate("Home"))}
-              ></Button></>
-          
-        )}
-        <Button
-          title="Create Account"
-          buttonStyle={{ backgroundColor: HeadingColour, marginRight: 5 }}
-          onPress={() => {
-            if (!state.isCreatingAccount) {
-              setState({ isCreatingAccount: true });
-            } else {
-              OnCreateAccountConfirmPress();
-            }
-          }}
-        ></Button>
-        {state.isCreatingAccount && (<Button
-          title="Back"
-          buttonStyle={{ backgroundColor: HeadingColour }}
-          onPress={() => {
-            setState({isCreatingAccount: undefined})
-          }}
-        ></Button>)}
+                onPress={() =>
+                  SignInAnon()
+                    .then((res) => setAppState({ user: res.user ?? undefined }))
+                    .then(() => props.navigation.navigate("Home"))
+                }
+              ></Button>
+            </>
+          )}
+          <Button
+            title="Create Account"
+            buttonStyle={{ backgroundColor: HeadingColour, marginRight: 5 }}
+            onPress={() => {
+              if (!state.isCreatingAccount) {
+                setState({ isCreatingAccount: true });
+              } else {
+                OnCreateAccountConfirmPress();
+              }
+            }}
+          ></Button>
+          {state.isCreatingAccount && (
+            <Button
+              title="Back"
+              buttonStyle={{ backgroundColor: HeadingColour }}
+              onPress={() => {
+                setState({ isCreatingAccount: undefined });
+              }}
+            ></Button>
+          )}
         </View>
       </View>
     </>

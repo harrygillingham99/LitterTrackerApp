@@ -9,10 +9,12 @@ import { FirebaseAuthProvider, IfFirebaseAuthed } from "@react-firebase/auth";
 import * as firebase from "firebase";
 import { firebaseConfig } from "./scripts/services/firebase/Firebase";
 import { NotLoggedInScreen } from "./scripts/screens/NotLoggedInScreen";
+import { AppContainer } from "./scripts/state/AppState";
 
 export default function App() {
   return (
     <NavigationContainer>
+      <AppContainer.Provider>
       <FirebaseAuthProvider firebase={firebase} {...firebaseConfig}>
         <Drawer.Navigator initialRouteName={Routes.Unauthenticated}>
           <Drawer.Screen
@@ -37,6 +39,7 @@ export default function App() {
           />
         </Drawer.Navigator>
       </FirebaseAuthProvider>
+      </AppContainer.Provider>
     </NavigationContainer>
   );
 }

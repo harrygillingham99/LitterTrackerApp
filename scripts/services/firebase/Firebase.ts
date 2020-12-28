@@ -14,15 +14,15 @@ export const SignInWithEmailPassword = async (
   email: string,
   password: string
 ) => {
-  await firebase.default.auth().signInWithEmailAndPassword(email, password);
+  return await firebase.default.auth().signInWithEmailAndPassword(email, password);
 };
 
 export const SignInAnon = async () => {
-  await firebase.default.auth().signInAnonymously();
+  return await firebase.default.auth().signInAnonymously();
 };
 
 export const CreateEmailAccount = async (email: string, password: string) => {
-  await firebase.default.auth().createUserWithEmailAndPassword(email, password);
+  return await firebase.default.auth().createUserWithEmailAndPassword(email, password);
 };
 export const SignOut = () => {
   firebase.default.auth().signOut();
