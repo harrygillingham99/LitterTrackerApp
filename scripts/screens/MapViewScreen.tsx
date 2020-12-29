@@ -79,7 +79,7 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
               },
             })}
           }
-          mapType={"hybrid"}
+          mapType={mapState.mapType}
           rotateEnabled={true}
           showsTraffic={true}
           onPress={(e) =>
