@@ -27,5 +27,3 @@ export const CreateEmailAccount = async (email: string, password: string) => {
 export const SignOut = () => {
   firebase.default.auth().signOut();
 };
-export const GetJwtToken = () =>
-  firebase.default.auth().currentUser?.getIdToken();

@@ -46,12 +46,15 @@ export const NotLoggedInScreen = (props: NotLoggedInScreenProps) => {
   const OnEmailAddressChange = (input: string) =>
     EmailIsValid(input)
       ? setState({ emailAddress: input, emailErrorMessage: undefined })
-      : setState({ emailErrorMessage: ErrorMessages.EmailValidation });
+      : setState({
+          emailErrorMessage: ErrorMessages.EmailValidation,
+          emailAddress: undefined,
+        });
 
   const OnPasswordChange = (input: string) => {
     const result = PasswordIsValid(input);
     if (result !== true) {
-      setState({ passwordErrorMessage: result });
+      setState({ passwordErrorMessage: result, password: undefined });
     } else {
       setState({ password: input, passwordErrorMessage: undefined });
     }
@@ -60,7 +63,10 @@ export const NotLoggedInScreen = (props: NotLoggedInScreenProps) => {
   const OnConfirmPasswordChange = (input: string) => {
     const result = PasswordIsValid(input);
     if (result !== true) {
-      setState({ confirmPasswordErrorMessage: result });
+      setState({
+        confirmPasswordErrorMessage: result,
+        confirmPassword: undefined,
+      });
     } else {
       setState({ confirmPassword: input, passwordErrorMessage: undefined });
     }
@@ -122,9 +128,17 @@ export const NotLoggedInScreen = (props: NotLoggedInScreenProps) => {
                 title="Sign In"
                 buttonStyle={{ backgroundColor: HeadingColour, marginRight: 5 }}
                 onPress={() =>
-                  SignInWithEmailPassword(state.emailAddress, state.password)
-                    .then((res) => setAppState({ user: res.user ?? undefined }))
-                    .then(() => props.navigation.navigate("Home"))
+                  state.emailAddress !== undefined &&
+                  state.password !== undefined
+                    ? SignInWithEmailPassword(
+                        state.emailAddress,
+                        state.password
+                      )
+                        .then((res) =>
+                          setAppState({ user: res.user ?? undefined })
+                        )
+                        .then(() => props.navigation.navigate("Home"))
+                    : console.log("Invalid credentials")
                 }
               ></Button>
               <Button

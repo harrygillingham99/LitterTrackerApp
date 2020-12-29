@@ -6,8 +6,8 @@ import { Routes } from "../types/nav/Routes";
 import { DrawerNavigationProp } from "@react-navigation/drawer";
 import { AppLogoIcon } from "../components/AppLogoIcon";
 import { Button } from "react-native-elements";
-import { FirebaseAuthConsumer } from "@react-firebase/auth";
 import { AppContainer } from "../state/AppState";
+import { IConfig, SessionClient } from "../services/api/Client";
 
 type HomeScreenNavigationProp = DrawerNavigationProp<
   DrawerScreens,
@@ -19,26 +19,16 @@ type HomeScreenProps = {
 };
 
 export const HomeScreen = (props: HomeScreenProps) => {
-  const {appState} = AppContainer.useContainer()
+  const { appState, getJwtTokenForUser } = AppContainer.useContainer();
+  const client = new SessionClient(new IConfig(getJwtTokenForUser()))
   return (
     <>
-      <FirebaseAuthConsumer>
-        {({ user }) => {
-          console.log(user);
-          return (
-            <>
-              <AppHeader
-                leftComponentOnPress={props.navigation.toggleDrawer}
-                centerComponent={AppLogoIcon}
-              />
-              <Text>{JSON.stringify(appState.user)}</Text>
-              <Button
-                title={"text"}
-              />
-            </>
-          );
-        }}
-      </FirebaseAuthConsumer>
+      <AppHeader
+        leftComponentOnPress={props.navigation.toggleDrawer}
+        centerComponent={AppLogoIcon}
+      />
+      <Text>{appState.user.email}</Text>
+      <Button title={"text"} onPress={() => client.getLitterPins().then(res => console.log(res)).catch(e => console.log(e))}/>
     </>
   );
 };
