@@ -3,6 +3,7 @@ import { createContainer } from "unstated-next";
 import * as firebase from "firebase"
 import React from "react";
 import { LatLng } from "react-native-maps";
+import { DefaultLatDelta, DefaultLongDelta } from "../utils/Constants";
 
 interface AppState {
   user: firebase.default.User
@@ -17,12 +18,13 @@ interface Reigon{
 
 interface MapState{
   markers: LatLng[],
-  location: Reigon
+  location: Reigon,
+  mapLoading: boolean
 }
 
 const useAppState = () => {
   const [appState, setAppState] = useSetState<AppState>();
-  const [mapState, setMapState] = useSetState<MapState>({location: {latitude: 50.7192, longitude: 1.8808}, markers: []});
+  const [mapState, setMapState] = useSetState<MapState>({location: {latitude: 50.7192, longitude: 1.8808, latitudeDelta: DefaultLatDelta, longitudeDelta: DefaultLongDelta}, markers: [], mapLoading: false});
   const [token, setToken] = React.useState<string>("not-logged-in");
   
   const getJwtTokenForUser = () => {

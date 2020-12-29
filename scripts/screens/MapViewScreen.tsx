@@ -10,6 +10,7 @@ import { AppContainer } from "../state/AppState";
 import useEffectOnce from "react-use/lib/useEffectOnce";
 import * as Location from "expo-location";
 import { Button } from "react-native-elements";
+import { Loader } from "../components/Loader";
 
 type MapViewScreenNavigationProp = DrawerNavigationProp<
   DrawerScreens,
@@ -24,6 +25,7 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
   const { mapState, setMapState } = AppContainer.useContainer();
 
   const OnCenterMapPress = async () => {
+    setMapState({ mapLoading: true });
     let location = await Location.getCurrentPositionAsync({});
     setMapState({
       location: {
@@ -32,6 +34,7 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
         latitudeDelta: mapState.location.latitudeDelta,
         longitudeDelta: mapState.location.longitudeDelta,
       },
+      mapLoading: false,
     });
   };
 
@@ -45,50 +48,69 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
     })();
   });
 
-  console.log(mapState);
   return (
     <>
       <AppHeader
         leftComponentOnPress={props.navigation.toggleDrawer}
         centerComponent={AppLogoIcon}
       />
-      <MapView
-        provider={"google"}
-        style={BeachMapStyles}
-        region={{
-          latitude: mapState.location.latitude,
-          longitude: mapState.location.longitude,
-          latitudeDelta: 0,
-          longitudeDelta: 0,
-        }}
-        onRegionChangeComplete={(e) =>{
-          console.log(e.latitudeDelta)
-          console.log(e.longitudeDelta)}
-        }
-        mapType={"hybrid"}
-        rotateEnabled={true}
-        showsTraffic={true}
-        onPress={(e) =>
-          setMapState({
-            markers: [
-              ...mapState.markers,
-              {
+      {!mapState.mapLoading && (
+        <MapView
+          provider={"google"}
+          style={BeachMapStyles}
+          region={{
+            latitude: mapState.location.latitude,
+            longitude: mapState.location.longitude,
+            latitudeDelta: mapState.location.latitudeDelta,
+            longitudeDelta: mapState.location.longitudeDelta,
+          }}
+          onRegionChangeComplete={({
+            latitude,
+            latitudeDelta,
+            longitude,
+            longitudeDelta,
+          }) =>{
+            setMapState({
+              location: {
+                latitude: latitude,
+                longitude: longitude,
+                latitudeDelta: latitudeDelta,
+                longitudeDelta: longitudeDelta,
+              },
+            })}
+          }
+          mapType={"hybrid"}
+          rotateEnabled={true}
+          showsTraffic={true}
+          onPress={(e) =>
+            setMapState({
+              markers: [
+                ...mapState.markers,
+                {
+                  latitude: e.nativeEvent.coordinate.latitude,
+                  longitude: e.nativeEvent.coordinate.longitude,
+                },
+              ],
+              location: {
                 latitude: e.nativeEvent.coordinate.latitude,
                 longitude: e.nativeEvent.coordinate.longitude,
+                latitudeDelta: mapState.location.latitudeDelta,
+                longitudeDelta: mapState.location.longitudeDelta,
               },
-            ],
-          })
-        }
-      >
-        {mapState.markers?.map((marker, i) => (
-          <Marker key={`pin-${i}`} coordinate={marker} />
-        ))}
-        <Button
-          style={buttonCallout}
-          title="Center"
-          onPress={() => OnCenterMapPress()}
-        ></Button>
-      </MapView>
+            })
+          }
+        >
+          {mapState.markers?.map((marker, i) => (
+            <Marker key={`pin-${i}`} coordinate={marker} />
+          ))}
+          <Button
+            style={buttonCallout}
+            title="Center"
+            onPress={() => OnCenterMapPress()}
+          ></Button>
+        </MapView>
+      )}
+      {mapState.mapLoading && <Loader />}
     </>
   );
 };
@@ -96,7 +118,7 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
 export const BeachMapStyles: StyleProp<ViewStyle> = {
   width: Dimensions.get("window").width,
   height: Dimensions.get("window").height,
-  margin: 1,
+  marginBottom: 50,
   flex: 1,
 };
 export const buttonCallout: StyleProp<ViewStyle> = {
