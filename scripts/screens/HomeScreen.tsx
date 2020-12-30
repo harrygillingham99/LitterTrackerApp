@@ -7,7 +7,7 @@ import { DrawerNavigationProp } from "@react-navigation/drawer";
 import { AppLogoIcon } from "../components/AppLogoIcon";
 import { Button } from "react-native-elements";
 import { AppContainer } from "../state/AppState";
-import { IConfig, SessionClient } from "../services/api/Client";
+import { IConfig, LitterTrackerAppClient } from "../services/api/Client";
 
 type HomeScreenNavigationProp = DrawerNavigationProp<
   DrawerScreens,
@@ -20,7 +20,7 @@ type HomeScreenProps = {
 
 export const HomeScreen = (props: HomeScreenProps) => {
   const { appState, getJwtTokenForUser } = AppContainer.useContainer();
-  const client = new SessionClient(new IConfig(getJwtTokenForUser()))
+  const client = new LitterTrackerAppClient(new IConfig(getJwtTokenForUser()))
   return (
     <>
       <AppHeader

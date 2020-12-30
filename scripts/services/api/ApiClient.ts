@@ -16,6 +16,11 @@ export class IConfig {
   JwtToken: string;
 }
 
+/**
+ * Base class for NSwag API Client
+ * has override methods to spread in my Authorization header
+ * and for getting the ApiUrl from config
+ */
 export class AuthorizedApiBase {
   private readonly config: IConfig;
 

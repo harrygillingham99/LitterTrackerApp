@@ -5,3 +5,11 @@ export const Container : StyleProp<ViewStyle> = {
     alignItems: 'center', // Centered horizontally
     flex:1
  }
+
+ export const LoaderContainer : StyleProp<ViewStyle> = {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-around",
+    padding: 10,
+  };
+  

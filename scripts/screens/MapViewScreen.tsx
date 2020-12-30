@@ -11,6 +11,8 @@ import useEffectOnce from "react-use/lib/useEffectOnce";
 import * as Location from "expo-location";
 import { Button } from "react-native-elements";
 import { Loader } from "../components/Loader";
+import { MapOverlay } from "../components/map/MapOverlay";
+import { LatLng, LitterPin } from "../services/api/Client";
 
 type MapViewScreenNavigationProp = DrawerNavigationProp<
   DrawerScreens,
@@ -22,7 +24,12 @@ type MapViewScreenProps = {
 };
 
 export const MapViewScreen = (props: MapViewScreenProps) => {
-  const { mapState, setMapState } = AppContainer.useContainer();
+  const {
+    appState,
+    mapState,
+    setMapState,
+    newPinsRequiringPhotos,
+  } = AppContainer.useContainer();
 
   const OnCenterMapPress = async () => {
     setMapState({ mapLoading: true });
@@ -55,60 +62,82 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
         centerComponent={AppLogoIcon}
       />
       {!mapState.mapLoading && (
-        <MapView
-          provider={"google"}
-          style={BeachMapStyles}
-          region={{
-            latitude: mapState.location.latitude,
-            longitude: mapState.location.longitude,
-            latitudeDelta: mapState.location.latitudeDelta,
-            longitudeDelta: mapState.location.longitudeDelta,
-          }}
-          onRegionChangeComplete={({
-            latitude,
-            latitudeDelta,
-            longitude,
-            longitudeDelta,
-          }) =>{
-            setMapState({
-              location: {
-                latitude: latitude,
-                longitude: longitude,
-                latitudeDelta: latitudeDelta,
-                longitudeDelta: longitudeDelta,
-              },
-            })}
-          }
-          mapType={mapState.mapType}
-          rotateEnabled={true}
-          showsTraffic={true}
-          onPress={(e) =>
-            setMapState({
-              markers: [
-                ...mapState.markers,
-                {
+        <>
+          <MapView
+            provider={"google"}
+            style={BeachMapStyles}
+            region={{
+              latitude: mapState.location.latitude,
+              longitude: mapState.location.longitude,
+              latitudeDelta: mapState.location.latitudeDelta,
+              longitudeDelta: mapState.location.longitudeDelta,
+            }}
+            showsUserLocation={true}
+            onRegionChangeComplete={({
+              latitude,
+              latitudeDelta,
+              longitude,
+              longitudeDelta,
+            }) => {
+              setMapState({
+                location: {
+                  latitude: latitude,
+                  longitude: longitude,
+                  latitudeDelta: latitudeDelta,
+                  longitudeDelta: longitudeDelta,
+                },
+              });
+            }}
+            mapType={mapState.mapType}
+            rotateEnabled={true}
+            showsTraffic={true}
+            onPress={(e) =>
+              setMapState({
+                markers: [
+                  ...mapState.markers,
+                  new LitterPin({
+                    markerLocation: new LatLng({
+                      latitude: e.nativeEvent.coordinate.latitude,
+                      longitude: e.nativeEvent.coordinate.longitude,
+                    }),
+                    createdByUid: appState.user.uid,
+                    imageUrls: undefined,
+                  }),
+                ],
+                location: {
                   latitude: e.nativeEvent.coordinate.latitude,
                   longitude: e.nativeEvent.coordinate.longitude,
+                  latitudeDelta: mapState.location.latitudeDelta,
+                  longitudeDelta: mapState.location.longitudeDelta,
                 },
-              ],
-              location: {
-                latitude: e.nativeEvent.coordinate.latitude,
-                longitude: e.nativeEvent.coordinate.longitude,
-                latitudeDelta: mapState.location.latitudeDelta,
-                longitudeDelta: mapState.location.longitudeDelta,
-              },
-            })
-          }
-        >
-          {mapState.markers?.map((marker, i) => (
-            <Marker key={`pin-${i}`} coordinate={marker} />
-          ))}
-          <Button
-            style={buttonCallout}
-            title="Center"
-            onPress={() => OnCenterMapPress()}
-          ></Button>
-        </MapView>
+              })
+            }
+          >
+            {mapState.markers?.map((marker, i) => (
+              <Marker
+                key={`pin-${i}`}
+                pinColor={
+                  newPinsRequiringPhotos.indexOf(marker) > 0 ? "black" : "green"
+                }
+                coordinate={{
+                  latitude:
+                    marker.markerLocation!.latitude ??
+                    mapState.location.latitude,
+                  longitude:
+                    marker.markerLocation!.longitude ??
+                    mapState.location.longitude,
+                }}
+                onPress={() => setMapState({ selectedMarker: marker })}
+              />
+            ))}
+            <Button
+              style={buttonCallout}
+              title="Center"
+              onPress={() => OnCenterMapPress()}
+            ></Button>
+          </MapView>
+          <MapOverlay />
+        </>
       )}
       {mapState.mapLoading && <Loader />}
     </>
