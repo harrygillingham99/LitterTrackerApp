@@ -1,13 +1,8 @@
-import {ApiUrl} from '../config/ApiConfig'
+import { ApiUrl } from "../config/ApiConfig";
 
-/**
- * Configuration class needed in base class.
- * The config is provided to the API client at initialization time.
- * API clients inherit from #AuthorizedApiBase and provide the config.
- */
 export class IConfig {
-  constructor(token : string){
-    this.JwtToken = token
+  constructor(token: string) {
+    this.JwtToken = token;
   }
   /**
    * Returns a valid value for the Authorization header.
@@ -16,11 +11,6 @@ export class IConfig {
   JwtToken: string;
 }
 
-/**
- * Base class for NSwag API Client
- * has override methods to spread in my Authorization header
- * and for getting the ApiUrl from config
- */
 export class AuthorizedApiBase {
   private readonly config: IConfig;
 
@@ -31,12 +21,12 @@ export class AuthorizedApiBase {
   protected transformOptions = (options: RequestInit): Promise<RequestInit> => {
     options.headers = {
       ...options.headers,
-      Authorization: this.config.JwtToken
+      Authorization: this.config.JwtToken,
     };
     return Promise.resolve(options);
   };
 
   protected getBaseUrl = (defaultUrl: string, baseUrl?: string) => {
-    return ApiUrl !== undefined ? ApiUrl : defaultUrl 
-  }
+    return ApiUrl !== undefined ? ApiUrl : defaultUrl;
+  };
 }

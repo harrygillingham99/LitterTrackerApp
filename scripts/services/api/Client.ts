@@ -7,7 +7,18 @@
 //----------------------
 // ReSharper disable InconsistentNaming
 
-import {ApiUrl} from '../config/ApiConfig'
+import { ApiUrl } from "../config/ApiConfig";
+export class IConfig {
+  constructor(token: string) {
+    this.JwtToken = token;
+  }
+  /**
+   * Returns a valid value for the Authorization header.
+   * Used to dynamically inject the current auth header.
+   */
+  JwtToken: string;
+}
+
 export class AuthorizedApiBase {
   private readonly config: IConfig;
 
@@ -18,14 +29,14 @@ export class AuthorizedApiBase {
   protected transformOptions = (options: RequestInit): Promise<RequestInit> => {
     options.headers = {
       ...options.headers,
-      Authorization: this.config.JwtToken
+      Authorization: this.config.JwtToken,
     };
     return Promise.resolve(options);
   };
 
   protected getBaseUrl = (defaultUrl: string, baseUrl?: string) => {
-    return ApiUrl !== undefined ? ApiUrl : defaultUrl 
-  }
+    return ApiUrl !== undefined ? ApiUrl : defaultUrl;
+  };
 }
 
 export class LitterTrackerAppClient extends AuthorizedApiBase {
@@ -43,7 +54,7 @@ export class LitterTrackerAppClient extends AuthorizedApiBase {
      * @return Success
      */
     getLitterPins(): Promise<LitterPin[]> {
-        let url_ = this.baseUrl + "/app/all-pins";
+        let url_ = this.baseUrl + "/app/pins";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ = <RequestInit>{
@@ -93,7 +104,62 @@ export class LitterTrackerAppClient extends AuthorizedApiBase {
     /**
      * @return Success
      */
-    createNewLitterPin(request: LitterPin): Promise<FileResponse> {
+    createNewLitterPins(request: LitterPin[]): Promise<LitterPin[]> {
+        let url_ = this.baseUrl + "/app/pins";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(request);
+
+        let options_ = <RequestInit>{
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processCreateNewLitterPins(_response);
+        });
+    }
+
+    protected processCreateNewLitterPins(response: Response): Promise<LitterPin[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(LitterPin.fromJS(item));
+            }
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized Request", status, _responseText, _headers);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            return throwException("Server Error", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<LitterPin[]>(<any>null);
+    }
+
+    /**
+     * @return Success
+     */
+    createNewLitterPin(request: LitterPin): Promise<LitterPin> {
         let url_ = this.baseUrl + "/app/pin";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -104,7 +170,7 @@ export class LitterTrackerAppClient extends AuthorizedApiBase {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "Accept": "application/octet-stream"
+                "Accept": "application/json"
             }
         };
 
@@ -115,7 +181,113 @@ export class LitterTrackerAppClient extends AuthorizedApiBase {
         });
     }
 
-    protected processCreateNewLitterPin(response: Response): Promise<FileResponse> {
+    protected processCreateNewLitterPin(response: Response): Promise<LitterPin> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = LitterPin.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized Request", status, _responseText, _headers);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            return throwException("Server Error", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<LitterPin>(<any>null);
+    }
+
+    /**
+     * @return Success
+     */
+    updateLitterPin(request: LitterPin): Promise<LitterPin> {
+        let url_ = this.baseUrl + "/app/update-pin";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(request);
+
+        let options_ = <RequestInit>{
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processUpdateLitterPin(_response);
+        });
+    }
+
+    protected processUpdateLitterPin(response: Response): Promise<LitterPin> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = LitterPin.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized Request", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Not Pin Owner", status, _responseText, _headers);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            return throwException("Server Error", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<LitterPin>(<any>null);
+    }
+
+    /**
+     * @return Success
+     */
+    deleteLitterPin(request: LitterPin): Promise<FileResponse> {
+        let url_ = this.baseUrl + "/app/delete-pin";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(request);
+
+        let options_ = <RequestInit>{
+            body: content_,
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/octet-stream"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processDeleteLitterPin(_response);
+        });
+    }
+
+    protected processDeleteLitterPin(response: Response): Promise<FileResponse> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200 || status === 206) {
@@ -126,6 +298,10 @@ export class LitterTrackerAppClient extends AuthorizedApiBase {
         } else if (status === 401) {
             return response.text().then((_responseText) => {
             return throwException("Unauthorized Request", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Not Pin Owner", status, _responseText, _headers);
             });
         } else if (status === 500) {
             return response.text().then((_responseText) => {
@@ -177,7 +353,12 @@ export interface IDataStoreItem {
 export class LitterPin extends DataStoreItem implements ILitterPin {
     markerLocation?: LatLng | undefined;
     imageUrls?: string[] | undefined;
+    weatherData?: WeatherData | undefined;
     createdByUid?: string | undefined;
+    areaCleaned?: boolean;
+    dateCreated?: DateTime | undefined;
+    dateLastUpdated?: DateTime | undefined;
+    lastUpdatedByUid?: string | undefined;
 
     constructor(data?: ILitterPin) {
         super(data);
@@ -192,7 +373,12 @@ export class LitterPin extends DataStoreItem implements ILitterPin {
                 for (let item of _data["imageUrls"])
                     this.imageUrls!.push(item);
             }
+            this.weatherData = _data["weatherData"] ? WeatherData.fromJS(_data["weatherData"]) : <any>undefined;
             this.createdByUid = _data["createdByUid"];
+            this.areaCleaned = _data["areaCleaned"];
+            this.dateCreated = _data["dateCreated"] ? DateTime.fromJS(_data["dateCreated"]) : <any>undefined;
+            this.dateLastUpdated = _data["dateLastUpdated"] ? DateTime.fromJS(_data["dateLastUpdated"]) : <any>undefined;
+            this.lastUpdatedByUid = _data["lastUpdatedByUid"];
         }
     }
 
@@ -211,7 +397,12 @@ export class LitterPin extends DataStoreItem implements ILitterPin {
             for (let item of this.imageUrls)
                 data["imageUrls"].push(item);
         }
+        data["weatherData"] = this.weatherData ? this.weatherData.toJSON() : <any>undefined;
         data["createdByUid"] = this.createdByUid;
+        data["areaCleaned"] = this.areaCleaned;
+        data["dateCreated"] = this.dateCreated ? this.dateCreated.toJSON() : <any>undefined;
+        data["dateLastUpdated"] = this.dateLastUpdated ? this.dateLastUpdated.toJSON() : <any>undefined;
+        data["lastUpdatedByUid"] = this.lastUpdatedByUid;
         super.toJSON(data);
         return data; 
     }
@@ -220,7 +411,12 @@ export class LitterPin extends DataStoreItem implements ILitterPin {
 export interface ILitterPin extends IDataStoreItem {
     markerLocation?: LatLng | undefined;
     imageUrls?: string[] | undefined;
+    weatherData?: WeatherData | undefined;
     createdByUid?: string | undefined;
+    areaCleaned?: boolean;
+    dateCreated?: DateTime | undefined;
+    dateLastUpdated?: DateTime | undefined;
+    lastUpdatedByUid?: string | undefined;
 }
 
 export class LatLng implements ILatLng {
@@ -263,6 +459,212 @@ export interface ILatLng {
     longitude?: number;
 }
 
+export class WeatherData implements IWeatherData {
+    temperature?: number;
+    weatherDescription?: string | undefined;
+    windSpeed?: number;
+    windDirection?: number;
+
+    constructor(data?: IWeatherData) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.temperature = _data["temperature"];
+            this.weatherDescription = _data["weatherDescription"];
+            this.windSpeed = _data["windSpeed"];
+            this.windDirection = _data["windDirection"];
+        }
+    }
+
+    static fromJS(data: any): WeatherData {
+        data = typeof data === 'object' ? data : {};
+        let result = new WeatherData();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["temperature"] = this.temperature;
+        data["weatherDescription"] = this.weatherDescription;
+        data["windSpeed"] = this.windSpeed;
+        data["windDirection"] = this.windDirection;
+        return data; 
+    }
+}
+
+export interface IWeatherData {
+    temperature?: number;
+    weatherDescription?: string | undefined;
+    windSpeed?: number;
+    windDirection?: number;
+}
+
+export class DateTime implements IDateTime {
+    year?: number;
+    month?: number;
+    day?: number;
+    hours?: number;
+    minutes?: number;
+    seconds?: number;
+    nanos?: number;
+    utcOffset?: Duration | undefined;
+    timeZone?: TimeZone | undefined;
+    timeOffsetCase?: TimeOffsetOneofCase;
+
+    constructor(data?: IDateTime) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.year = _data["year"];
+            this.month = _data["month"];
+            this.day = _data["day"];
+            this.hours = _data["hours"];
+            this.minutes = _data["minutes"];
+            this.seconds = _data["seconds"];
+            this.nanos = _data["nanos"];
+            this.utcOffset = _data["utcOffset"] ? Duration.fromJS(_data["utcOffset"]) : <any>undefined;
+            this.timeZone = _data["timeZone"] ? TimeZone.fromJS(_data["timeZone"]) : <any>undefined;
+            this.timeOffsetCase = _data["timeOffsetCase"];
+        }
+    }
+
+    static fromJS(data: any): DateTime {
+        data = typeof data === 'object' ? data : {};
+        let result = new DateTime();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["year"] = this.year;
+        data["month"] = this.month;
+        data["day"] = this.day;
+        data["hours"] = this.hours;
+        data["minutes"] = this.minutes;
+        data["seconds"] = this.seconds;
+        data["nanos"] = this.nanos;
+        data["utcOffset"] = this.utcOffset ? this.utcOffset.toJSON() : <any>undefined;
+        data["timeZone"] = this.timeZone ? this.timeZone.toJSON() : <any>undefined;
+        data["timeOffsetCase"] = this.timeOffsetCase;
+        return data; 
+    }
+}
+
+export interface IDateTime {
+    year?: number;
+    month?: number;
+    day?: number;
+    hours?: number;
+    minutes?: number;
+    seconds?: number;
+    nanos?: number;
+    utcOffset?: Duration | undefined;
+    timeZone?: TimeZone | undefined;
+    timeOffsetCase?: TimeOffsetOneofCase;
+}
+
+export class Duration implements IDuration {
+    seconds?: number;
+    nanos?: number;
+
+    constructor(data?: IDuration) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.seconds = _data["seconds"];
+            this.nanos = _data["nanos"];
+        }
+    }
+
+    static fromJS(data: any): Duration {
+        data = typeof data === 'object' ? data : {};
+        let result = new Duration();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["seconds"] = this.seconds;
+        data["nanos"] = this.nanos;
+        return data; 
+    }
+}
+
+export interface IDuration {
+    seconds?: number;
+    nanos?: number;
+}
+
+export class TimeZone implements ITimeZone {
+    id?: string | undefined;
+    version?: string | undefined;
+
+    constructor(data?: ITimeZone) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.version = _data["version"];
+        }
+    }
+
+    static fromJS(data: any): TimeZone {
+        data = typeof data === 'object' ? data : {};
+        let result = new TimeZone();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["version"] = this.version;
+        return data; 
+    }
+}
+
+export interface ITimeZone {
+    id?: string | undefined;
+    version?: string | undefined;
+}
+
+export enum TimeOffsetOneofCase {
+    None = 0,
+    UtcOffset = 8,
+    TimeZone = 9,
+}
+
 export interface FileResponse {
     data: Blob;
     status: number;
@@ -299,20 +701,4 @@ function throwException(message: string, status: number, response: string, heade
         throw result;
     else
         throw new ApiException(message, status, response, headers, null);
-}
-
-/**
- * Configuration class needed in base class.
- * The config is provided to the API client at initialization time.
- * API clients inherit from #AuthorizedApiBase and provide the config.
- */
-export class IConfig {
-  constructor(token : string){
-    this.JwtToken = token
-  }
-  /**
-   * Returns a valid value for the Authorization header.
-   * Used to dynamically inject the current auth header.
-   */
-  JwtToken: string;
 }

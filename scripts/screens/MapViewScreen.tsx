@@ -11,8 +11,9 @@ import useEffectOnce from "react-use/lib/useEffectOnce";
 import * as Location from "expo-location";
 import { Button } from "react-native-elements";
 import { Loader } from "../components/Loader";
-import { MapOverlay } from "../components/map/MapOverlay";
 import { LatLng, LitterPin } from "../services/api/Client";
+import { MapContainer } from "../state/MapState";
+import { MarkerOverlay } from "../components/MarkerOverlay";
 
 type MapViewScreenNavigationProp = DrawerNavigationProp<
   DrawerScreens,
@@ -25,11 +26,12 @@ type MapViewScreenProps = {
 
 export const MapViewScreen = (props: MapViewScreenProps) => {
   const {
-    appState,
     mapState,
     setMapState,
     newPinsRequiringPhotos,
-  } = AppContainer.useContainer();
+  } = MapContainer.useContainer();
+
+  const { appState } = AppContainer.useContainer();
 
   const OnCenterMapPress = async () => {
     setMapState({ mapLoading: true });
@@ -55,6 +57,7 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
     })();
   });
 
+  console.log(mapState)
   return (
     <>
       <AppHeader
@@ -136,7 +139,7 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
               onPress={() => OnCenterMapPress()}
             ></Button>
           </MapView>
-          <MapOverlay />
+          <MarkerOverlay selectedMarker={mapState.selectedMarker} />
         </>
       )}
       {mapState.mapLoading && <Loader />}
@@ -149,6 +152,7 @@ export const BeachMapStyles: StyleProp<ViewStyle> = {
   height: Dimensions.get("window").height,
   marginBottom: 50,
   flex: 1,
+  justifyContent: "center"
 };
 export const buttonCallout: StyleProp<ViewStyle> = {
   flex: 1,

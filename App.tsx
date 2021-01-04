@@ -10,35 +10,38 @@ import * as firebase from "firebase";
 import { firebaseConfig } from "./scripts/services/firebase/Firebase";
 import { NotLoggedInScreen } from "./scripts/screens/NotLoggedInScreen";
 import { AppContainer } from "./scripts/state/AppState";
+import { MapContainer } from "./scripts/state/MapState";
 
 export default function App() {
   return (
     <NavigationContainer>
       <AppContainer.Provider>
-      <FirebaseAuthProvider firebase={firebase} {...firebaseConfig}>
-        <Drawer.Navigator initialRouteName={Routes.Unauthenticated}>
-          <Drawer.Screen
-            name={Routes.Home}
-            component={HomeScreen}
-            options={{ title: Routes.Home }}
-          />
-          <Drawer.Screen
-            name={Routes.MapView}
-            component={MapViewScreen}
-            options={{ title: Routes.MapView }}
-          />
-          <Drawer.Screen
-            name={Routes.Settings}
-            component={SettingsScreen}
-            options={{ title: Routes.Settings }}
-          />
-          <Drawer.Screen
-            name={Routes.Unauthenticated}
-            component={NotLoggedInScreen}
-            options={{ title: "", gestureEnabled: false }}
-          />
-        </Drawer.Navigator>
-      </FirebaseAuthProvider>
+        <MapContainer.Provider>
+          <FirebaseAuthProvider firebase={firebase} {...firebaseConfig}>
+            <Drawer.Navigator initialRouteName={Routes.Unauthenticated}>
+              <Drawer.Screen
+                name={Routes.Home}
+                component={HomeScreen}
+                options={{ title: Routes.Home }}
+              />
+              <Drawer.Screen
+                name={Routes.MapView}
+                component={MapViewScreen}
+                options={{ title: Routes.MapView }}
+              />
+              <Drawer.Screen
+                name={Routes.Settings}
+                component={SettingsScreen}
+                options={{ title: Routes.Settings }}
+              />
+              <Drawer.Screen
+                name={Routes.Unauthenticated}
+                component={NotLoggedInScreen}
+                options={{ title: "", gestureEnabled: false }}
+              />
+            </Drawer.Navigator>
+          </FirebaseAuthProvider>
+        </MapContainer.Provider>
       </AppContainer.Provider>
     </NavigationContainer>
   );

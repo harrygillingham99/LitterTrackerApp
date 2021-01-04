@@ -2,12 +2,12 @@ import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import { MapTypes } from "../utils/Constants";
-import { AppContainer } from "../state/AppState";
 import { ListItem } from "react-native-elements";
 import * as Maps from "react-native-maps";
+import { MapContainer } from "../state/MapState";
 
 export const SettingsScreen = () => {
-  const { mapState, setMapState } = AppContainer.useContainer();
+  const { mapState, setMapState } = MapContainer.useContainer();
   const GetMapType = (text: React.ReactText) => {
     switch (text) {
       case MapTypes.hybrid:

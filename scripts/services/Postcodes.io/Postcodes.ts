@@ -12,7 +12,7 @@ export const GetLocationInformationForCoordinate = async (
         latitude: coordinate.latitude!,
         longitude: coordinate.longitude!,
         radius: 1000,
-        limit: 5,
+        limit: 1,
       },
     ],
   };
