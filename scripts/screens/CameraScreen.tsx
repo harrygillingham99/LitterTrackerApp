@@ -15,7 +15,6 @@ import {
   UploadImageRequest,
 } from "../services/api/Client";
 import { IConfig } from "../services/api/ApiClient";
-import { Marker } from "react-native-maps";
 
 type CameraScreenNavigationProp = DrawerNavigationProp<
   DrawerScreens,
@@ -59,6 +58,9 @@ export const CameraScreen = (props: CameraScreenProps) => {
     setCameraState({ showPreview: true, image: photo });
   };
 
+
+  //This syntax is called an Immediately Invoked Function Expression (IIFE)
+  //Provides a nice way to grab async data from a synchronous environment and not have to deal with promises
   const UploadFile = () => {
     (async () => {
       const token = (await appState.user.getIdToken()) ?? "not-logged-in";
