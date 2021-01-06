@@ -9,7 +9,6 @@
     "generate-client": "nswag run ./nswag.json /runtime:WinX64"
   },
   "dependencies": {
-    "@google-cloud/storage": "^5.7.0",
     "@react-firebase/auth": "^0.2.10",
     "@react-native-async-storage/async-storage": "^1.13.2",
     "@react-native-community/masked-view": "0.1.10",
@@ -17,6 +16,7 @@
     "@react-navigation/native": "^5.7.6",
     "expo": "~39.0.2",
     "expo-camera": "^9.1.1",
+    "expo-file-system": "~9.2.0",
     "expo-location": "~9.0.0",
     "expo-secure-store": "~9.2.0",
     "expo-status-bar": "~1.0.2",

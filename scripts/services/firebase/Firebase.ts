@@ -6,8 +6,8 @@ export const firebaseConfig = {
   projectId: "litter-tracker",
   storageBucket: "litter-tracker.appspot.com",
   messagingSenderId: "399869966067",
-  appId: "1:399869966067:web:6bc44af577f6151b756986",
-  databaseURL: "",
+  appId: "1:399869966067:web:6fa5c795f2a51142756986",
+  databaseURL: ""
 };
 
 export const SignInWithEmailPassword = async (

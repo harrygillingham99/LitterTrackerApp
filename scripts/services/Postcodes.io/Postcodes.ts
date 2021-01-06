@@ -27,6 +27,7 @@ export const GetLocationInformationForCoordinate = async (
     JSON.stringify(request),
     headers
   );
-
+  
+  //its a horrible nested object, wasn't really a way around this without spending way too much time on it
   return result.result[0].result[0];
 };

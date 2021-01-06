@@ -1,3 +1,4 @@
+//Generated using http://json2ts.com/ based on https://postcodes.io/ example response documentation
 
 export interface Geolocation {
     longitude: number;

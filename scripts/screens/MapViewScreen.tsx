@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Dimensions, StyleProp, ViewStyle } from "react-native";
 import { AppHeader } from "../components/nav/Header";
 import { DrawerNavigationProp } from "@react-navigation/drawer";
@@ -9,7 +9,7 @@ import MapView, { Marker } from "react-native-maps";
 import { AppContainer } from "../state/AppState";
 import useEffectOnce from "react-use/lib/useEffectOnce";
 import * as Location from "expo-location";
-import { Button } from "react-native-elements";
+import { Button, Text } from "react-native-elements";
 import { Loader } from "../components/Loader";
 import { LatLng, LitterPin } from "../services/api/Client";
 import { MapContainer } from "../state/MapState";
@@ -31,6 +31,8 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
     newPinsRequiringPhotos,
   } = MapContainer.useContainer();
 
+  const [permission, setPermission] = useState<boolean>(false);
+
   const { appState } = AppContainer.useContainer();
 
   const OnCenterMapPress = async () => {
@@ -49,7 +51,8 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
 
   useEffectOnce(() => {
     (async () => {
-      let { status } = await Location.requestPermissionsAsync();
+      const { status } = await Location.requestPermissionsAsync();
+      setPermission(status === "granted");
       if (status !== "granted") {
         console.log("Permission to access location was denied");
         return;
@@ -64,7 +67,7 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
         leftComponentOnPress={props.navigation.toggleDrawer}
         centerComponent={AppLogoIcon}
       />
-      {!mapState.mapLoading && (
+      {!mapState.mapLoading && permission && (
         <>
           <MapView
             provider={"google"}
@@ -114,6 +117,7 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
                   longitudeDelta: mapState.location.longitudeDelta,
                 },
               })
+        
             }
           >
             {mapState.markers?.map((marker, i) => (
@@ -143,6 +147,7 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
         </>
       )}
       {mapState.mapLoading && <Loader />}
+      {!mapState.mapLoading && !permission && <Text>Permission needed to access Location Services.</Text>}
     </>
   );
 };

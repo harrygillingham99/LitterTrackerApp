@@ -4,6 +4,7 @@ import { MapTypes } from "react-native-maps";
 import { DefaultLatDelta, DefaultLongDelta } from "../utils/Constants";
 import { LitterPin } from "../services/api/Client";
 import firebase from "firebase";
+import { useStateWithHistory } from "react-use";
 
 interface Reigon {
   latitude: number;
@@ -34,8 +35,7 @@ const useMapState = () => {
     selectedMarker: undefined,
   });
 
-  const setMapState = (
-    patch: Partial<MapState> | ((prevState: MapState) => Partial<MapState>)
+  const setMapState = (patch: Partial<MapState> | ((prevState: MapState) => Partial<MapState>)
   ) => {
     setMap(patch);
   };

@@ -5,6 +5,8 @@ import { GetLocationInformationForCoordinate } from "../services/Postcodes.io/Po
 import { Loader } from "./Loader";
 import { Location } from "../services/Postcodes.io/Types";
 import useSetState from "react-use/lib/useSetState";
+import { navigate } from "../types/nav/NavigationRef";
+import { Routes } from "../types/nav/Routes";
 
 interface MapOverlayProps {
   selectedMarker: LitterPin | undefined;
@@ -62,7 +64,10 @@ export const MarkerOverlay = (props: MapOverlayProps) => {
           <Card>
             <Card.Title>{`${location?.parliamentary_constituency} - ${location?.postcode}`}</Card.Title>
             <Card.Divider />
-            <Button title={"Add Photos"}></Button>
+            <Button title={"Add Photos"} onPress={() => {
+              setOverlayState({visible: false})
+              navigate(Routes.Camera);
+              }}></Button>
           </Card>
         )}
       </>

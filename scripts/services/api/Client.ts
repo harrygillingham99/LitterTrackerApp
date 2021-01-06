@@ -314,6 +314,55 @@ export class LitterTrackerAppClient extends AuthorizedApiBase {
         }
         return Promise.resolve<FileResponse>(<any>null);
     }
+
+    /**
+     * @return Success
+     */
+    uploadImage(request: UploadImageRequest): Promise<FileResponse> {
+        let url_ = this.baseUrl + "/app/upload-image";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(request);
+
+        let options_ = <RequestInit>{
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/octet-stream"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processUploadImage(_response);
+        });
+    }
+
+    protected processUploadImage(response: Response): Promise<FileResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
+            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized Request", status, _responseText, _headers);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            return throwException("Server Error", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<FileResponse>(<any>null);
+    }
 }
 
 export abstract class DataStoreItem implements IDataStoreItem {
@@ -356,8 +405,8 @@ export class LitterPin extends DataStoreItem implements ILitterPin {
     weatherData?: WeatherData | undefined;
     createdByUid?: string | undefined;
     areaCleaned?: boolean;
-    dateCreated?: DateTime | undefined;
-    dateLastUpdated?: DateTime | undefined;
+    dateCreated?: Date;
+    dateLastUpdated?: Date;
     lastUpdatedByUid?: string | undefined;
 
     constructor(data?: ILitterPin) {
@@ -376,8 +425,8 @@ export class LitterPin extends DataStoreItem implements ILitterPin {
             this.weatherData = _data["weatherData"] ? WeatherData.fromJS(_data["weatherData"]) : <any>undefined;
             this.createdByUid = _data["createdByUid"];
             this.areaCleaned = _data["areaCleaned"];
-            this.dateCreated = _data["dateCreated"] ? DateTime.fromJS(_data["dateCreated"]) : <any>undefined;
-            this.dateLastUpdated = _data["dateLastUpdated"] ? DateTime.fromJS(_data["dateLastUpdated"]) : <any>undefined;
+            this.dateCreated = _data["dateCreated"] ? new Date(_data["dateCreated"].toString()) : <any>undefined;
+            this.dateLastUpdated = _data["dateLastUpdated"] ? new Date(_data["dateLastUpdated"].toString()) : <any>undefined;
             this.lastUpdatedByUid = _data["lastUpdatedByUid"];
         }
     }
@@ -400,8 +449,8 @@ export class LitterPin extends DataStoreItem implements ILitterPin {
         data["weatherData"] = this.weatherData ? this.weatherData.toJSON() : <any>undefined;
         data["createdByUid"] = this.createdByUid;
         data["areaCleaned"] = this.areaCleaned;
-        data["dateCreated"] = this.dateCreated ? this.dateCreated.toJSON() : <any>undefined;
-        data["dateLastUpdated"] = this.dateLastUpdated ? this.dateLastUpdated.toJSON() : <any>undefined;
+        data["dateCreated"] = this.dateCreated ? this.dateCreated.toISOString() : <any>undefined;
+        data["dateLastUpdated"] = this.dateLastUpdated ? this.dateLastUpdated.toISOString() : <any>undefined;
         data["lastUpdatedByUid"] = this.lastUpdatedByUid;
         super.toJSON(data);
         return data; 
@@ -414,8 +463,8 @@ export interface ILitterPin extends IDataStoreItem {
     weatherData?: WeatherData | undefined;
     createdByUid?: string | undefined;
     areaCleaned?: boolean;
-    dateCreated?: DateTime | undefined;
-    dateLastUpdated?: DateTime | undefined;
+    dateCreated?: Date;
+    dateLastUpdated?: Date;
     lastUpdatedByUid?: string | undefined;
 }
 
@@ -507,19 +556,12 @@ export interface IWeatherData {
     windDirection?: number;
 }
 
-export class DateTime implements IDateTime {
-    year?: number;
-    month?: number;
-    day?: number;
-    hours?: number;
-    minutes?: number;
-    seconds?: number;
-    nanos?: number;
-    utcOffset?: Duration | undefined;
-    timeZone?: TimeZone | undefined;
-    timeOffsetCase?: TimeOffsetOneofCase;
+export class UploadImageRequest implements IUploadImageRequest {
+    base64Image?: string | undefined;
+    uploadedByUid?: string | undefined;
+    markerDatastoreId?: number;
 
-    constructor(data?: IDateTime) {
+    constructor(data?: IUploadImageRequest) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -530,139 +572,32 @@ export class DateTime implements IDateTime {
 
     init(_data?: any) {
         if (_data) {
-            this.year = _data["year"];
-            this.month = _data["month"];
-            this.day = _data["day"];
-            this.hours = _data["hours"];
-            this.minutes = _data["minutes"];
-            this.seconds = _data["seconds"];
-            this.nanos = _data["nanos"];
-            this.utcOffset = _data["utcOffset"] ? Duration.fromJS(_data["utcOffset"]) : <any>undefined;
-            this.timeZone = _data["timeZone"] ? TimeZone.fromJS(_data["timeZone"]) : <any>undefined;
-            this.timeOffsetCase = _data["timeOffsetCase"];
+            this.base64Image = _data["base64Image"];
+            this.uploadedByUid = _data["uploadedByUid"];
+            this.markerDatastoreId = _data["markerDatastoreId"];
         }
     }
 
-    static fromJS(data: any): DateTime {
+    static fromJS(data: any): UploadImageRequest {
         data = typeof data === 'object' ? data : {};
-        let result = new DateTime();
+        let result = new UploadImageRequest();
         result.init(data);
         return result;
     }
 
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
-        data["year"] = this.year;
-        data["month"] = this.month;
-        data["day"] = this.day;
-        data["hours"] = this.hours;
-        data["minutes"] = this.minutes;
-        data["seconds"] = this.seconds;
-        data["nanos"] = this.nanos;
-        data["utcOffset"] = this.utcOffset ? this.utcOffset.toJSON() : <any>undefined;
-        data["timeZone"] = this.timeZone ? this.timeZone.toJSON() : <any>undefined;
-        data["timeOffsetCase"] = this.timeOffsetCase;
+        data["base64Image"] = this.base64Image;
+        data["uploadedByUid"] = this.uploadedByUid;
+        data["markerDatastoreId"] = this.markerDatastoreId;
         return data; 
     }
 }
 
-export interface IDateTime {
-    year?: number;
-    month?: number;
-    day?: number;
-    hours?: number;
-    minutes?: number;
-    seconds?: number;
-    nanos?: number;
-    utcOffset?: Duration | undefined;
-    timeZone?: TimeZone | undefined;
-    timeOffsetCase?: TimeOffsetOneofCase;
-}
-
-export class Duration implements IDuration {
-    seconds?: number;
-    nanos?: number;
-
-    constructor(data?: IDuration) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.seconds = _data["seconds"];
-            this.nanos = _data["nanos"];
-        }
-    }
-
-    static fromJS(data: any): Duration {
-        data = typeof data === 'object' ? data : {};
-        let result = new Duration();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["seconds"] = this.seconds;
-        data["nanos"] = this.nanos;
-        return data; 
-    }
-}
-
-export interface IDuration {
-    seconds?: number;
-    nanos?: number;
-}
-
-export class TimeZone implements ITimeZone {
-    id?: string | undefined;
-    version?: string | undefined;
-
-    constructor(data?: ITimeZone) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.id = _data["id"];
-            this.version = _data["version"];
-        }
-    }
-
-    static fromJS(data: any): TimeZone {
-        data = typeof data === 'object' ? data : {};
-        let result = new TimeZone();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["id"] = this.id;
-        data["version"] = this.version;
-        return data; 
-    }
-}
-
-export interface ITimeZone {
-    id?: string | undefined;
-    version?: string | undefined;
-}
-
-export enum TimeOffsetOneofCase {
-    None = 0,
-    UtcOffset = 8,
-    TimeZone = 9,
+export interface IUploadImageRequest {
+    base64Image?: string | undefined;
+    uploadedByUid?: string | undefined;
+    markerDatastoreId?: number;
 }
 
 export interface FileResponse {

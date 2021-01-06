@@ -11,7 +11,6 @@ import { IConfig, LitterPin, LitterTrackerAppClient } from "../services/api/Clie
 import { MapContainer } from "../state/MapState";
 import useSetState from "react-use/lib/useSetState";
 import { MarkerOverlay } from "../components/MarkerOverlay";
-import firebase from "firebase";
 import { ScrollView } from "react-native-gesture-handler";
 
 type HomeScreenNavigationProp = DrawerNavigationProp<
@@ -34,7 +33,7 @@ export const HomeScreen = (props: HomeScreenProps) => {
 
   useEffect(() => {
     (async () => {
-      const token = await firebase.auth().currentUser?.getIdToken() ?? "not-logged-in"
+      const token = await appState.user.getIdToken() ?? "not-logged-in"
       const client = new LitterTrackerAppClient(new IConfig(token));
       const markers = await client.getLitterPins();
       setMapState({markers: [...markers]})
@@ -61,7 +60,7 @@ export const HomeScreen = (props: HomeScreenProps) => {
                 )}, ${marker.markerLocation?.longitude?.toFixed(
                   2
                 )}`}</ListItem.Title>
-                <ListItem.Subtitle>{`Created - ${marker.dateCreated?.day}/${marker.dateCreated?.month}/${marker.dateCreated?.year}, Last updated - ${marker.dateLastUpdated}`}</ListItem.Subtitle>
+                <ListItem.Subtitle>{`Created - ${marker.dateCreated}, Last updated - ${marker.dateLastUpdated}`}</ListItem.Subtitle>
               </ListItem.Content>
             </ListItem>
           ))}
