@@ -13,7 +13,7 @@ interface Reigon {
   longitudeDelta: number;
 }
 
-interface MapState {
+export interface MapState {
   markers: LitterPin[];
   location: Reigon;
   mapLoading: boolean;
@@ -40,7 +40,7 @@ const useMapState = () => {
     setMap(patch);
   };
 
-  const newPinsRequiringPhotos = mapState.markers.filter(x => x.imageUrls === undefined);
+  const newPinsRequiringPhotos = mapState.markers.filter(x => x?.imageUrls === undefined);
 
   const currentUserUid = firebase.auth().currentUser?.uid;
 

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react";
 import { DrawerNavigationProp } from "@react-navigation/drawer";
 import { Text } from "react-native-elements";
 import { DrawerScreens } from "../types/nav/DrawerScreens";
@@ -15,6 +15,7 @@ import {
   UploadImageRequest,
 } from "../services/api/Client";
 import { IConfig } from "../services/api/ApiClient";
+import { Loader } from "../components/Loader";
 
 type CameraScreenNavigationProp = DrawerNavigationProp<
   DrawerScreens,
@@ -30,27 +31,21 @@ interface CameraScreenState {
   cameraType: any;
   image: CameraCapturedPicture | undefined;
   showPreview: boolean;
+  loading: boolean;
 }
 
 export const CameraScreen = (props: CameraScreenProps) => {
-  const {
-    mapState,
-    setMapState,
-    newPinsRequiringPhotos,
-  } = MapContainer.useContainer();
-
+  const { mapState, setMapState } = MapContainer.useContainer();
   const { appState } = AppContainer.useContainer();
-
   let cameraRef = useRef<Camera | null>(null);
-
   const [cameraState, setCameraState] = useSetState<CameraScreenState>({
     permission: false,
     cameraType: Camera.Constants.Type.back,
     image: undefined,
     showPreview: false,
+    loading: false,
   });
-
-  const { permission, cameraType, image, showPreview } = cameraState;
+  const { permission, cameraType, image, showPreview, loading } = cameraState;
 
   const CaptureImage = async () => {
     if (!permission) return;
@@ -58,27 +53,48 @@ export const CameraScreen = (props: CameraScreenProps) => {
     setCameraState({ showPreview: true, image: photo });
   };
 
-
   //This syntax is called an Immediately Invoked Function Expression (IIFE)
   //Provides a nice way to grab async data from a synchronous environment and not have to deal with promises
-  const UploadFile = () => {
+  const UploadFileAndAssignToPin = () => {
     (async () => {
       const token = (await appState.user.getIdToken()) ?? "not-logged-in";
       const client = new LitterTrackerAppClient(new IConfig(token));
-      await client.uploadImage(
+      const fileName = await client.uploadImage(
         new UploadImageRequest({
           uploadedByUid: appState.user.uid,
           markerDatastoreId: mapState.selectedMarker?.dataStoreId ?? 1,
           base64Image: image!.base64!,
         })
       );
-      setCameraState({ showPreview: false });
+      const pinToUpdate = mapState!.selectedMarker!;
+      pinToUpdate.imageUrls === undefined
+        ? (pinToUpdate.imageUrls = new Array<string>(fileName))
+        : pinToUpdate.imageUrls.push(fileName);
+      var pinResult = await client.updateLitterPin(pinToUpdate);
+      const newMarkerList = mapState.markers.map((marker) => {
+        if (marker.dataStoreId === pinResult.dataStoreId) {
+          marker = pinResult;
+        }
+        return marker;
+      });
+      setCameraState({ showPreview: false, image: undefined });
+      setMapState({
+        markers: newMarkerList,
+        location: {
+          latitude: pinResult!.markerLocation!.latitude!,
+          longitude: pinResult!.markerLocation!.longitude!,
+          latitudeDelta: mapState.location.latitudeDelta,
+          longitudeDelta: mapState.location.longitudeDelta,
+        },
+        selectedMarker: undefined,
+      });
+      props.navigation.navigate("MapView");
     })();
   };
 
   const OnConfirmPhoto = () => {
-    if (cameraState.image === undefined) return;
-    UploadFile();
+    if (image === undefined) return;
+    UploadFileAndAssignToPin();
   };
 
   useEffectOnce(() => {
@@ -97,6 +113,9 @@ export const CameraScreen = (props: CameraScreenProps) => {
   }
   if (permission === false) {
     return <Text>No access to camera</Text>;
+  }
+  if (loading) {
+    return <Loader />;
   }
   if (showPreview && image) {
     return (

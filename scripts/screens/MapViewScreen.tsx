@@ -1,17 +1,22 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Dimensions, StyleProp, ViewStyle } from "react-native";
 import { AppHeader } from "../components/nav/Header";
 import { DrawerNavigationProp } from "@react-navigation/drawer";
 import { DrawerScreens } from "../types/nav/DrawerScreens";
 import { Routes } from "../types/nav/Routes";
 import { AppLogoIcon } from "../components/AppLogoIcon";
-import MapView, { Marker } from "react-native-maps";
+import MapView, { MapEvent, Marker } from "react-native-maps";
 import { AppContainer } from "../state/AppState";
 import useEffectOnce from "react-use/lib/useEffectOnce";
 import * as Location from "expo-location";
 import { Button, Text } from "react-native-elements";
 import { Loader } from "../components/Loader";
-import { LatLng, LitterPin } from "../services/api/Client";
+import {
+  IConfig,
+  LatLng,
+  LitterPin,
+  LitterTrackerAppClient,
+} from "../services/api/Client";
 import { MapContainer } from "../state/MapState";
 import { MarkerOverlay } from "../components/MarkerOverlay";
 
@@ -33,20 +38,22 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
 
   const [permission, setPermission] = useState<boolean>(false);
 
-  const { appState } = AppContainer.useContainer();
+  const { appState, refreshPins } = AppContainer.useContainer();
 
-  const OnCenterMapPress = async () => {
-    setMapState({ mapLoading: true });
-    let location = await Location.getCurrentPositionAsync({});
-    setMapState({
-      location: {
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-        latitudeDelta: mapState.location.latitudeDelta,
-        longitudeDelta: mapState.location.longitudeDelta,
-      },
-      mapLoading: false,
-    });
+  const OnCenterMapPress = () => {
+    (async () => {
+      setMapState({ mapLoading: true });
+      let location = await Location.getCurrentPositionAsync({});
+      setMapState({
+        location: {
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          latitudeDelta: mapState.location.latitudeDelta,
+          longitudeDelta: mapState.location.longitudeDelta,
+        },
+        mapLoading: false,
+      });
+    })();
   };
 
   useEffectOnce(() => {
@@ -60,7 +67,30 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
     })();
   });
 
-  console.log(mapState)
+  const OnMapPress = async (event: MapEvent) => {
+    event.persist();
+    const token = await appState.user.getIdToken();
+    const client = new LitterTrackerAppClient(new IConfig(token));
+    const newPin = await client.createNewLitterPin(
+      new LitterPin({
+        markerLocation: new LatLng({
+          latitude: event.nativeEvent.coordinate.latitude,
+          longitude: event.nativeEvent.coordinate.longitude,
+        }),
+        imageUrls: undefined,
+      })
+    );
+    setMapState({
+      markers: [...mapState.markers, newPin],
+      location: {
+        latitude: event.nativeEvent.coordinate.latitude,
+        longitude: event.nativeEvent.coordinate.longitude,
+        latitudeDelta: mapState.location.latitudeDelta,
+        longitudeDelta: mapState.location.longitudeDelta,
+      },
+    });
+  };
+
   return (
     <>
       <AppHeader
@@ -97,28 +127,7 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
             mapType={mapState.mapType}
             rotateEnabled={true}
             showsTraffic={true}
-            onPress={(e) =>
-              setMapState({
-                markers: [
-                  ...mapState.markers,
-                  new LitterPin({
-                    markerLocation: new LatLng({
-                      latitude: e.nativeEvent.coordinate.latitude,
-                      longitude: e.nativeEvent.coordinate.longitude,
-                    }),
-                    createdByUid: appState.user.uid,
-                    imageUrls: undefined,
-                  }),
-                ],
-                location: {
-                  latitude: e.nativeEvent.coordinate.latitude,
-                  longitude: e.nativeEvent.coordinate.longitude,
-                  latitudeDelta: mapState.location.latitudeDelta,
-                  longitudeDelta: mapState.location.longitudeDelta,
-                },
-              })
-        
-            }
+            onPress={(e) => OnMapPress(e)}
           >
             {mapState.markers?.map((marker, i) => (
               <Marker
@@ -128,10 +137,10 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
                 }
                 coordinate={{
                   latitude:
-                    marker.markerLocation!.latitude ??
+                    marker?.markerLocation?.latitude ??
                     mapState.location.latitude,
                   longitude:
-                    marker.markerLocation!.longitude ??
+                    marker?.markerLocation?.longitude ??
                     mapState.location.longitude,
                 }}
                 onPress={() => setMapState({ selectedMarker: marker })}
@@ -147,7 +156,9 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
         </>
       )}
       {mapState.mapLoading && <Loader />}
-      {!mapState.mapLoading && !permission && <Text>Permission needed to access Location Services.</Text>}
+      {!mapState.mapLoading && !permission && (
+        <Text>Permission needed to access Location Services.</Text>
+      )}
     </>
   );
 };
@@ -157,7 +168,7 @@ export const BeachMapStyles: StyleProp<ViewStyle> = {
   height: Dimensions.get("window").height,
   marginBottom: 50,
   flex: 1,
-  justifyContent: "center"
+  justifyContent: "center",
 };
 export const buttonCallout: StyleProp<ViewStyle> = {
   flex: 1,
@@ -166,7 +177,7 @@ export const buttonCallout: StyleProp<ViewStyle> = {
   bottom: 10,
   alignSelf: "flex-end",
   justifyContent: "flex-end",
-  backgroundColor: "transparent",
+  backgroundColor: "green",
   borderWidth: 0.5,
   borderRadius: 20,
 };

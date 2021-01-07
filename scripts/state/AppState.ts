@@ -11,11 +11,13 @@ const useAppState = () => {
   const [appState, setAppState] = useSetState<AppState>();
   const [refresh, setRefresh] = useState<boolean>()
 
+  const refreshPins = () => setRefresh(!refresh);
+
   return {
     appState,
     setAppState,
     refresh,
-    setRefresh
+    refreshPins
   };
 };
 

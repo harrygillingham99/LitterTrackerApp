@@ -39,7 +39,9 @@ interface LoginScreenState {
   isCreatingAccount: boolean;
 }
 
-export const NotLoggedInScreen = (props: NotLoggedInScreenProps) => {
+export const NotLoggedInScreen = (
+  props: NotLoggedInScreenProps
+): JSX.Element => {
   const [state, setState] = useSetState<LoginScreenState>();
   const { setAppState } = AppContainer.useContainer();
 
@@ -97,7 +99,7 @@ export const NotLoggedInScreen = (props: NotLoggedInScreenProps) => {
       <Tile
         imageSrc={require("../../assets/stock.png")}
         title="Sign up to track your findings and compete with your friends!"
-      ></Tile>
+      />
       <View style={Container}>
         <Input
           placeholder="Email Address"
@@ -140,7 +142,7 @@ export const NotLoggedInScreen = (props: NotLoggedInScreenProps) => {
                         .then(() => props.navigation.navigate("Home"))
                     : console.log("Invalid credentials")
                 }
-              ></Button>
+              />
               <Button
                 title="Sign In As Guest"
                 buttonStyle={{ backgroundColor: HeadingColour, marginRight: 5 }}
@@ -149,7 +151,7 @@ export const NotLoggedInScreen = (props: NotLoggedInScreenProps) => {
                     .then((res) => setAppState({ user: res.user ?? undefined }))
                     .then(() => props.navigation.navigate("Home"))
                 }
-              ></Button>
+              />
             </>
           )}
           <Button
@@ -162,7 +164,7 @@ export const NotLoggedInScreen = (props: NotLoggedInScreenProps) => {
                 OnCreateAccountConfirmPress();
               }
             }}
-          ></Button>
+          />
           {state.isCreatingAccount && (
             <Button
               title="Back"
@@ -170,7 +172,7 @@ export const NotLoggedInScreen = (props: NotLoggedInScreenProps) => {
               onPress={() => {
                 setState({ isCreatingAccount: undefined });
               }}
-            ></Button>
+            />
           )}
         </View>
       </View>

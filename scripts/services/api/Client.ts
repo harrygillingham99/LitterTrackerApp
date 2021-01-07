@@ -318,7 +318,7 @@ export class LitterTrackerAppClient extends AuthorizedApiBase {
     /**
      * @return Success
      */
-    uploadImage(request: UploadImageRequest): Promise<FileResponse> {
+    uploadImage(request: UploadImageRequest): Promise<string> {
         let url_ = this.baseUrl + "/app/upload-image";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -329,7 +329,7 @@ export class LitterTrackerAppClient extends AuthorizedApiBase {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "Accept": "application/octet-stream"
+                "Accept": "application/json"
             }
         };
 
@@ -340,14 +340,16 @@ export class LitterTrackerAppClient extends AuthorizedApiBase {
         });
     }
 
-    protected processUploadImage(response: Response): Promise<FileResponse> {
+    protected processUploadImage(response: Response): Promise<string> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200 || status === 206) {
-            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
-            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = resultData200 !== undefined ? resultData200 : <any>null;
+            return result200;
+            });
         } else if (status === 401) {
             return response.text().then((_responseText) => {
             return throwException("Unauthorized Request", status, _responseText, _headers);
@@ -361,7 +363,7 @@ export class LitterTrackerAppClient extends AuthorizedApiBase {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<FileResponse>(<any>null);
+        return Promise.resolve<string>(<any>null);
     }
 }
 
