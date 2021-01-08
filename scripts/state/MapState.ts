@@ -1,7 +1,6 @@
 import useSetState from "react-use/lib/useSetState";
 import { createContainer } from "unstated-next";
 import { MapTypes } from "react-native-maps";
-import { DefaultLatDelta, DefaultLongDelta } from "../utils/Constants";
 import { LitterPin } from "../services/api/Client";
 import firebase from "firebase";
 import { GetData, StoreData } from "../storage/Storage";

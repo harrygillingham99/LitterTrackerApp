@@ -10,20 +10,20 @@ export const firebaseConfig = {
   databaseURL: ""
 };
 
-export const SignInWithEmailPassword = async (
+export const signInWithEmailPassword = async (
   email: string,
   password: string
 ) => {
   return await firebase.default.auth().signInWithEmailAndPassword(email, password);
 };
 
-export const SignInAnon = async () => {
+export const signInAnon = async () => {
   return await firebase.default.auth().signInAnonymously();
 };
 
-export const CreateEmailAccount = async (email: string, password: string) => {
+export const createEmailAccount = async (email: string, password: string) => {
   return await firebase.default.auth().createUserWithEmailAndPassword(email, password);
 };
-export const SignOut = () => {
-  firebase.default.auth().signOut();
+export const signOut = async () => {
+  await firebase.default.auth().signOut();
 };

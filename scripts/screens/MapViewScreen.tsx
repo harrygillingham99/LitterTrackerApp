@@ -34,7 +34,7 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
   const {
     mapState,
     setMapState,
-    tryGetSavedMapType
+    tryGetSavedMapType,
   } = MapContainer.useContainer();
 
   const [permission, setPermission] = useState<boolean>(false);
@@ -91,7 +91,7 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
       },
     });
   };
-  
+
   return (
     <>
       <AppHeader
@@ -108,24 +108,27 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
             mapType={mapState.mapType}
             rotateEnabled={true}
             showsTraffic={true}
-            onPress={(e) =>  {
+            onPress={(e) => {
               e.persist();
               Alert.alert(
-              'Creating Litter Pin',
-              'Are you sure you want to create a new pin ',
-              [
-                {
-                  text: 'Yes',
-                  onPress: () => OnMapPress(e),
-                },
-                {
-                  text: 'Cancel',
-                  onPress: () => {return;},
-                  style: 'cancel'
-                }
-              ],
-              { cancelable: false }
-            )}}
+                "Creating Litter Pin",
+                "Are you sure you want to create a new pin ",
+                [
+                  {
+                    text: "Yes",
+                    onPress: () => OnMapPress(e),
+                  },
+                  {
+                    text: "Cancel",
+                    onPress: () => {
+                      return;
+                    },
+                    style: "cancel",
+                  },
+                ],
+                { cancelable: false }
+              );
+            }}
           >
             {mapState.markers?.map((marker, i) => (
               <Marker
@@ -141,7 +144,8 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
                 }}
                 onPress={(e) => {
                   e.stopPropagation();
-                  setMapState({ selectedMarker: marker })}}
+                  setMapState({ selectedMarker: marker });
+                }}
               />
             ))}
             <Button
@@ -150,7 +154,7 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
                 top: "5%",
                 left: "5%",
               }}
-              buttonStyle={{backgroundColor: HeadingColour}}
+              buttonStyle={{ backgroundColor: HeadingColour }}
               title="Center"
               onPress={() => OnCenterMapPress()}
             ></Button>
@@ -170,5 +174,5 @@ export const BeachMapStyles: StyleProp<ViewStyle> = {
   width: Dimensions.get("window").width,
   height: Dimensions.get("window").height,
   flex: 1,
-  alignSelf: "center"
+  alignSelf: "center",
 };

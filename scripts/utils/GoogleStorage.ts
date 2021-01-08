@@ -7,6 +7,8 @@ export const GetGoogleImageUrlsFromList = (imageUrls?: string[]) => {
 
 export const GetGoogleIconUrlFromList = (imageUrls?: string[]) => {
     if(imageUrls === undefined) return;
+    if(imageUrls[0] === undefined) return;
+    
     return GoogleStorageUrlTemplate.concat(imageUrls[0]);
 }
 

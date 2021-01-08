@@ -13,9 +13,9 @@ import {
 } from "../utils/Validation";
 import { Container } from "../styles/Container";
 import {
-  CreateEmailAccount,
-  SignInAnon,
-  SignInWithEmailPassword,
+  createEmailAccount,
+  signInAnon,
+  signInWithEmailPassword,
 } from "../services/firebase/Firebase";
 import { HeadingColour } from "../styles/Colours";
 import { AppContainer } from "../state/AppState";
@@ -53,7 +53,7 @@ export const NotLoggedInScreen = (
           emailAddress: undefined,
         });
 
-  const OnPasswordChange = (input: string) => {
+  const onPasswordChange = (input: string) => {
     const result = PasswordIsValid(input);
     if (result !== true) {
       setState({ passwordErrorMessage: result, password: undefined });
@@ -62,7 +62,7 @@ export const NotLoggedInScreen = (
     }
   };
 
-  const OnConfirmPasswordChange = (input: string) => {
+  const onConfirmPasswordChange = (input: string) => {
     const result = PasswordIsValid(input);
     if (result !== true) {
       setState({
@@ -74,7 +74,7 @@ export const NotLoggedInScreen = (
     }
   };
 
-  const OnCreateAccountConfirmPress = async () => {
+  const onCreateAccountConfirmPress = async () => {
     if (state.password !== state.confirmPassword) {
       setState({
         confirmPasswordErrorMessage: ErrorMessages.PasswordsDontMatch,
@@ -85,7 +85,7 @@ export const NotLoggedInScreen = (
       setState({ confirmPasswordErrorMessage: ErrorMessages.PasswordTooShort });
       return;
     }
-    var createResult = await CreateEmailAccount(
+    var createResult = await createEmailAccount(
       state.emailAddress,
       state.password
     );
@@ -112,7 +112,7 @@ export const NotLoggedInScreen = (
         />
         <Input
           placeholder="Password"
-          onChangeText={(text) => OnPasswordChange(text)}
+          onChangeText={(text) => onPasswordChange(text)}
           errorStyle={{ color: "red" }}
           errorMessage={state.passwordErrorMessage}
           secureTextEntry={true}
@@ -120,7 +120,7 @@ export const NotLoggedInScreen = (
         {state.isCreatingAccount && (
           <Input
             placeholder="Confirm Password"
-            onChangeText={(text) => OnConfirmPasswordChange(text)}
+            onChangeText={(text) => onConfirmPasswordChange(text)}
             errorStyle={{ color: "red" }}
             errorMessage={state.confirmPasswordErrorMessage}
             secureTextEntry={true}
@@ -137,7 +137,7 @@ export const NotLoggedInScreen = (
                     state.emailAddress !== undefined &&
                     state.password !== undefined
                   ) {
-                    var result = await SignInWithEmailPassword(
+                    var result = await signInWithEmailPassword(
                       state.emailAddress,
                       state.password
                     );
@@ -157,7 +157,7 @@ export const NotLoggedInScreen = (
               if (!state.isCreatingAccount) {
                 setState({ isCreatingAccount: true });
               } else {
-                OnCreateAccountConfirmPress();
+                onCreateAccountConfirmPress();
               }
             }}
           />
@@ -177,7 +177,7 @@ export const NotLoggedInScreen = (
               title="Continue As Guest"
               buttonStyle={{ backgroundColor: HeadingColour, marginRight: 5 }}
               onPress={async () => {
-                var result = await SignInAnon();
+                var result = await signInAnon();
                 setAppState({ user: result.user ?? undefined });
                 props.navigation.navigate("Home");
               }}

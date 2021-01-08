@@ -41,7 +41,7 @@ export const MarkerOverlay = (props: MapOverlayProps) => {
   });
   const { lastFetchedMarker, visible, loading, location } = overlayState;
 
-  //Using an IIFE (Immediately Invoked Function Expression) in any effect which has async actions 
+  //Using an IIFE (Immediately Invoked Function Expression) in any effect which has async actions
   useEffect(() => {
     (async () => {
       if (
@@ -108,7 +108,6 @@ export const MarkerOverlay = (props: MapOverlayProps) => {
             containerStyle={{
               height: Dimensions.get("window").height * 0.8,
               width: Dimensions.get("window").width * 0.8,
-              
             }}
           >
             <Loader />
@@ -119,7 +118,7 @@ export const MarkerOverlay = (props: MapOverlayProps) => {
             containerStyle={{
               height: Dimensions.get("window").height * 0.8,
               width: Dimensions.get("window").width * 0.8,
-              marginBottom: 10
+              marginBottom: 10,
             }}
           >
             <Card.Title>{`${location?.parliamentary_constituency} - ${location?.postcode}`}</Card.Title>
@@ -169,7 +168,10 @@ export const MarkerOverlay = (props: MapOverlayProps) => {
               selectedMarker.weatherData !== undefined && (
                 <>
                   <Text>{JSON.stringify(selectedMarker.weatherData)}</Text>
-                  <Text>Area Cleaned: {selectedMarker.areaCleaned ? "true" : "false"}</Text>
+                  <Text>
+                    Area Cleaned:{" "}
+                    {selectedMarker.areaCleaned ? "true" : "false"}
+                  </Text>
                 </>
               )}
             <Button

@@ -28,6 +28,7 @@ export const PinRowItem = (props: PinRowItemProps) => {
   const { marker, setState, setHomeState } = props;
   const { setMapState, mapState } = MapContainer.useContainer();
   const { appState } = AppContainer.useContainer();
+  const avatarImageUrl = GetGoogleIconUrlFromList(marker.imageUrls);
 
   const OnDeleteMarkerPress = async () => {
     setHomeState({ loading: true });
@@ -64,7 +65,8 @@ export const PinRowItem = (props: PinRowItemProps) => {
               style={{
                 color: "white",
                 paddingHorizontal: 10,
-                fontWeight: "600",
+                fontWeight: "800",
+                fontSize: 20,
                 transform: [{ scale }],
               }}
             >
@@ -83,7 +85,7 @@ export const PinRowItem = (props: PinRowItemProps) => {
         bottomDivider
         onPress={() => setState({ selectedMarker: marker })}
       >
-        <Avatar source={{ uri: GetGoogleIconUrlFromList(marker.imageUrls) }} />
+        <Avatar containerStyle={{height: 60, width: 60}} source={avatarImageUrl === undefined ?  require("../../assets/tree.png") : {uri:  avatarImageUrl}} />
         <ListItem.Content>
           <ListItem.Title>{`Marker at: ${marker.markerLocation?.latitude?.toFixed(
             5
