@@ -74,7 +74,7 @@ export const NotLoggedInScreen = (
     }
   };
 
-  const OnCreateAccountConfirmPress = () => {
+  const OnCreateAccountConfirmPress = async () => {
     if (state.password !== state.confirmPassword) {
       setState({
         confirmPasswordErrorMessage: ErrorMessages.PasswordsDontMatch,
@@ -85,9 +85,12 @@ export const NotLoggedInScreen = (
       setState({ confirmPasswordErrorMessage: ErrorMessages.PasswordTooShort });
       return;
     }
-    CreateEmailAccount(state.emailAddress, state.password)
-      .then((res) => setAppState({ user: res.user ?? undefined }))
-      .then(() => props.navigation.navigate("Home"));
+    var createResult = await CreateEmailAccount(
+      state.emailAddress,
+      state.password
+    );
+    setAppState({ user: createResult.user ?? undefined });
+    props.navigation.navigate("Home");
   };
 
   return (
@@ -123,34 +126,27 @@ export const NotLoggedInScreen = (
             secureTextEntry={true}
           />
         )}
-        <View style={{ flexDirection: "row", flex: 1 }}>
+        <View style={{ flexDirection: "row", flex: 1, maxHeight: 50 }}>
           {!state.isCreatingAccount && (
             <>
               <Button
                 title="Sign In"
                 buttonStyle={{ backgroundColor: HeadingColour, marginRight: 5 }}
-                onPress={() =>
-                  state.emailAddress !== undefined &&
-                  state.password !== undefined
-                    ? SignInWithEmailPassword(
-                        state.emailAddress,
-                        state.password
-                      )
-                        .then((res) =>
-                          setAppState({ user: res.user ?? undefined })
-                        )
-                        .then(() => props.navigation.navigate("Home"))
-                    : console.log("Invalid credentials")
-                }
-              />
-              <Button
-                title="Sign In As Guest"
-                buttonStyle={{ backgroundColor: HeadingColour, marginRight: 5 }}
-                onPress={() =>
-                  SignInAnon()
-                    .then((res) => setAppState({ user: res.user ?? undefined }))
-                    .then(() => props.navigation.navigate("Home"))
-                }
+                onPress={async () => {
+                  if (
+                    state.emailAddress !== undefined &&
+                    state.password !== undefined
+                  ) {
+                    var result = await SignInWithEmailPassword(
+                      state.emailAddress,
+                      state.password
+                    );
+                    setAppState({ user: result.user ?? undefined });
+                    props.navigation.navigate("Home");
+                  } else {
+                    console.log("Invalid Credential");
+                  }
+                }}
               />
             </>
           )}
@@ -175,6 +171,19 @@ export const NotLoggedInScreen = (
             />
           )}
         </View>
+        {!state.isCreatingAccount && (
+          <View style={{ flexDirection: "row", flex: 1 }}>
+            <Button
+              title="Continue As Guest"
+              buttonStyle={{ backgroundColor: HeadingColour, marginRight: 5 }}
+              onPress={async () => {
+                var result = await SignInAnon();
+                setAppState({ user: result.user ?? undefined });
+                props.navigation.navigate("Home");
+              }}
+            />
+          </View>
+        )}
       </View>
     </>
   );

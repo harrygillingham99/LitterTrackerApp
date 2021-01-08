@@ -64,6 +64,7 @@ export const HomeScreen = (props: HomeScreenProps) => {
             {!appState.user.isAnonymous &&
               markersForUser().map((marker) => (
                 <PinRowItem
+                  key={`${marker.dataStoreId}-item`}
                   marker={marker}
                   setState={setMapState}
                   setHomeState={setState}
@@ -73,6 +74,7 @@ export const HomeScreen = (props: HomeScreenProps) => {
             {!appState.user.isAnonymous &&
               otherPeoplesMarkers().map((marker) => (
                 <PinRowItem
+                  key={`${marker.dataStoreId}-item`}
                   marker={marker}
                   setState={setMapState}
                   setHomeState={setState}
@@ -81,6 +83,7 @@ export const HomeScreen = (props: HomeScreenProps) => {
             {appState.user.isAnonymous &&
               mapState.markers.map((marker) => (
                 <PinRowItem
+                  key={`${marker.dataStoreId}-item`}
                   marker={marker}
                   setState={setMapState}
                   setHomeState={setState}

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Dimensions, StyleProp, ViewStyle } from "react-native";
+import { Alert, Dimensions, StyleProp, ViewStyle } from "react-native";
 import { AppHeader } from "../components/nav/Header";
 import { DrawerNavigationProp } from "@react-navigation/drawer";
 import { DrawerScreens } from "../types/nav/DrawerScreens";
@@ -19,6 +19,7 @@ import {
 } from "../services/api/Client";
 import { MapContainer } from "../state/MapState";
 import { MarkerOverlay } from "../components/MarkerOverlay";
+import { getPinColour, HeadingColour } from "../styles/Colours";
 
 type MapViewScreenNavigationProp = DrawerNavigationProp<
   DrawerScreens,
@@ -33,12 +34,12 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
   const {
     mapState,
     setMapState,
-    newPinsRequiringPhotos,
+    tryGetSavedMapType
   } = MapContainer.useContainer();
 
   const [permission, setPermission] = useState<boolean>(false);
 
-  const { appState, refreshPins } = AppContainer.useContainer();
+  const { appState } = AppContainer.useContainer();
 
   const OnCenterMapPress = () => {
     (async () => {
@@ -57,6 +58,7 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
   };
 
   useEffectOnce(() => {
+    tryGetSavedMapType();
     (async () => {
       const { status } = await Location.requestPermissionsAsync();
       setPermission(status === "granted");
@@ -68,7 +70,6 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
   });
 
   const OnMapPress = async (event: MapEvent) => {
-    event.persist();
     const token = await appState.user.getIdToken();
     const client = new LitterTrackerAppClient(new IConfig(token));
     const newPin = await client.createNewLitterPin(
@@ -90,7 +91,7 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
       },
     });
   };
-
+  
   return (
     <>
       <AppHeader
@@ -102,39 +103,34 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
           <MapView
             provider={"google"}
             style={BeachMapStyles}
-            region={{
-              latitude: mapState.location.latitude,
-              longitude: mapState.location.longitude,
-              latitudeDelta: mapState.location.latitudeDelta,
-              longitudeDelta: mapState.location.longitudeDelta,
-            }}
+            initialRegion={mapState.location}
             showsUserLocation={true}
-            onRegionChangeComplete={({
-              latitude,
-              latitudeDelta,
-              longitude,
-              longitudeDelta,
-            }) => {
-              setMapState({
-                location: {
-                  latitude: latitude,
-                  longitude: longitude,
-                  latitudeDelta: latitudeDelta,
-                  longitudeDelta: longitudeDelta,
-                },
-              });
-            }}
             mapType={mapState.mapType}
             rotateEnabled={true}
             showsTraffic={true}
-            onPress={(e) => OnMapPress(e)}
+            onPress={(e) =>  {
+              e.persist();
+              Alert.alert(
+              'Creating Litter Pin',
+              'Are you sure you want to create a new pin ',
+              [
+                {
+                  text: 'Yes',
+                  onPress: () => OnMapPress(e),
+                },
+                {
+                  text: 'Cancel',
+                  onPress: () => {return;},
+                  style: 'cancel'
+                }
+              ],
+              { cancelable: false }
+            )}}
           >
             {mapState.markers?.map((marker, i) => (
               <Marker
                 key={`pin-${i}`}
-                pinColor={
-                  newPinsRequiringPhotos.indexOf(marker) > 0 ? "black" : "green"
-                }
+                pinColor={getPinColour(marker)}
                 coordinate={{
                   latitude:
                     marker?.markerLocation?.latitude ??
@@ -143,11 +139,18 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
                     marker?.markerLocation?.longitude ??
                     mapState.location.longitude,
                 }}
-                onPress={() => setMapState({ selectedMarker: marker })}
+                onPress={(e) => {
+                  e.stopPropagation();
+                  setMapState({ selectedMarker: marker })}}
               />
             ))}
             <Button
-              style={buttonCallout}
+              containerStyle={{
+                position: "absolute",
+                top: "5%",
+                left: "5%",
+              }}
+              buttonStyle={{backgroundColor: HeadingColour}}
               title="Center"
               onPress={() => OnCenterMapPress()}
             ></Button>
@@ -166,18 +169,6 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
 export const BeachMapStyles: StyleProp<ViewStyle> = {
   width: Dimensions.get("window").width,
   height: Dimensions.get("window").height,
-  marginBottom: 50,
   flex: 1,
-  justifyContent: "center",
-};
-export const buttonCallout: StyleProp<ViewStyle> = {
-  flex: 1,
-  flexDirection: "row",
-  position: "absolute",
-  bottom: 10,
-  alignSelf: "flex-end",
-  justifyContent: "flex-end",
-  backgroundColor: "green",
-  borderWidth: 0.5,
-  borderRadius: 20,
+  alignSelf: "center"
 };

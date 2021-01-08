@@ -4,7 +4,8 @@ import { MapTypes } from "react-native-maps";
 import { DefaultLatDelta, DefaultLongDelta } from "../utils/Constants";
 import { LitterPin } from "../services/api/Client";
 import firebase from "firebase";
-import { useStateWithHistory } from "react-use";
+import { GetData, StoreData } from "../storage/Storage";
+import { MapTypeKey } from "../storage/StorageKeys";
 
 interface Reigon {
   latitude: number;
@@ -24,10 +25,10 @@ export interface MapState {
 const useMapState = () => {
   const [mapState, setMap] = useSetState<MapState>({
     location: {
-      latitude: 50.7192,
-      longitude: 1.8808,
-      latitudeDelta: DefaultLatDelta,
-      longitudeDelta: DefaultLongDelta,
+      latitude: 50.72123099459833,
+      longitude: -1.8765086308121681,
+      latitudeDelta: 0.0717708440848881,
+      longitudeDelta: 0.0630741566419597,
     },
     markers: [],
     mapLoading: false,
@@ -35,25 +36,49 @@ const useMapState = () => {
     selectedMarker: undefined,
   });
 
-  const setMapState = (patch: Partial<MapState> | ((prevState: MapState) => Partial<MapState>)
+  const setMapState = (
+    patch: Partial<MapState> | ((prevState: MapState) => Partial<MapState>)
   ) => {
     setMap(patch);
   };
 
-  const newPinsRequiringPhotos = mapState.markers.filter(x => x?.imageUrls === undefined);
-
   const currentUserUid = firebase.auth().currentUser?.uid;
 
-  const markersForUser = () => mapState.markers.filter(marker => marker.createdByUid === currentUserUid || marker.lastUpdatedByUid === currentUserUid)
+  const tryGetSavedMapType = () => {
+    (async () => {
+      const savedType = await GetData<MapTypes>(MapTypeKey);
+      if (savedType === null) return;
+      setMap({ mapType: savedType });
+    })();
+  };
 
-  const otherPeoplesMarkers = () => mapState.markers.filter(marker => marker.createdByUid !== currentUserUid && marker.lastUpdatedByUid !== currentUserUid)
+  const saveMapTypeSelection = (type: MapTypes) => {
+    (async () => {
+      await StoreData<MapTypes>(type, MapTypeKey);
+    })();
+  };
+
+  const markersForUser = () =>
+    mapState.markers.filter(
+      (marker) =>
+        marker.createdByUid === currentUserUid ||
+        marker.lastUpdatedByUid === currentUserUid
+    );
+
+  const otherPeoplesMarkers = () =>
+    mapState.markers.filter(
+      (marker) =>
+        marker.createdByUid !== currentUserUid &&
+        marker.lastUpdatedByUid !== currentUserUid
+    );
 
   return {
     mapState,
     setMapState,
-    newPinsRequiringPhotos,
     markersForUser,
-    otherPeoplesMarkers
+    otherPeoplesMarkers,
+    tryGetSavedMapType,
+    saveMapTypeSelection,
   };
 };
 
