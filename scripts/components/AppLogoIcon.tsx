@@ -1,5 +1,5 @@
 import React from "react";
 import { Text } from "react-native"
 
-export const AppLogoIcon = <Text>Litter Tracker</Text>
+export const AppLogoIcon = <Text style={{color: "white"}}>Litter Tracker</Text>
     

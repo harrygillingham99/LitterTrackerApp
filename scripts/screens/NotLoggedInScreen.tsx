@@ -17,8 +17,9 @@ import {
   signInAnon,
   signInWithEmailPassword,
 } from "../services/firebase/Firebase";
-import { HeadingColour } from "../styles/Colours";
+import { AppColour } from "../styles/Colours";
 import { AppContainer } from "../state/AppState";
+import { LogInScreenImage } from "../utils/Constants";
 
 type NotLoggedInNavigationProp = DrawerNavigationProp<
   DrawerScreens,
@@ -90,7 +91,7 @@ export const NotLoggedInScreen = (
       state.password
     );
     setAppState({ user: createResult.user ?? undefined });
-    props.navigation.navigate("Home");
+    props.navigation.navigate(Routes.Home);
   };
 
   return (
@@ -100,7 +101,7 @@ export const NotLoggedInScreen = (
         hideLeftComponent={true}
       />
       <Tile
-        imageSrc={require("../../assets/stock.png")}
+        imageSrc={LogInScreenImage}
         title="Sign up to track your findings and compete with your friends!"
       />
       <View style={Container}>
@@ -131,7 +132,7 @@ export const NotLoggedInScreen = (
             <>
               <Button
                 title="Sign In"
-                buttonStyle={{ backgroundColor: HeadingColour, marginRight: 5 }}
+                buttonStyle={{ backgroundColor: AppColour, marginRight: 5 }}
                 onPress={async () => {
                   if (
                     state.emailAddress !== undefined &&
@@ -142,7 +143,7 @@ export const NotLoggedInScreen = (
                       state.password
                     );
                     setAppState({ user: result.user ?? undefined });
-                    props.navigation.navigate("Home");
+                    props.navigation.navigate(Routes.Home);
                   } else {
                     console.log("Invalid Credential");
                   }
@@ -152,7 +153,7 @@ export const NotLoggedInScreen = (
           )}
           <Button
             title="Create Account"
-            buttonStyle={{ backgroundColor: HeadingColour, marginRight: 5 }}
+            buttonStyle={{ backgroundColor: AppColour, marginRight: 5 }}
             onPress={() => {
               if (!state.isCreatingAccount) {
                 setState({ isCreatingAccount: true });
@@ -164,7 +165,7 @@ export const NotLoggedInScreen = (
           {state.isCreatingAccount && (
             <Button
               title="Back"
-              buttonStyle={{ backgroundColor: HeadingColour }}
+              buttonStyle={{ backgroundColor: AppColour }}
               onPress={() => {
                 setState({ isCreatingAccount: undefined });
               }}
@@ -175,11 +176,11 @@ export const NotLoggedInScreen = (
           <View style={{ flexDirection: "row", flex: 1 }}>
             <Button
               title="Continue As Guest"
-              buttonStyle={{ backgroundColor: HeadingColour, marginRight: 5 }}
+              buttonStyle={{ backgroundColor: AppColour, marginRight: 5 }}
               onPress={async () => {
                 var result = await signInAnon();
                 setAppState({ user: result.user ?? undefined });
-                props.navigation.navigate("Home");
+                props.navigation.navigate(Routes.Home);
               }}
             />
           </View>

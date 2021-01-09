@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Header, Icon } from "react-native-elements";
-import { HeadingColour } from "../../styles/Colours";
+import { AppColour } from "../../styles/Colours";
 
 /* 
 This is a custom header component used by the the screens in this application, 
@@ -37,7 +37,7 @@ export const AppHeader = ({
       }
       rightComponent={rightComponent}
       centerComponent={centerComponent}
-      backgroundColor={HeadingColour}
+      backgroundColor={AppColour}
     ></Header>
   );
 };

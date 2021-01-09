@@ -11,6 +11,7 @@ import {
 } from "../services/api/Client";
 import { AppContainer } from "../state/AppState";
 import { MapContainer, MapState } from "../state/MapState";
+import { PlaceholderPinImage } from "../utils/Constants";
 import { GetGoogleIconUrlFromList } from "../utils/GoogleStorage";
 
 interface PinRowItemProps {
@@ -85,7 +86,7 @@ export const PinRowItem = (props: PinRowItemProps) => {
         bottomDivider
         onPress={() => setState({ selectedMarker: marker })}
       >
-        <Avatar containerStyle={{height: 60, width: 60}} source={avatarImageUrl === undefined ?  require("../../assets/tree.png") : {uri:  avatarImageUrl}} />
+        <Avatar containerStyle={{height: 60, width: 60}} source={avatarImageUrl === undefined ? PlaceholderPinImage : {uri:  avatarImageUrl}} />
         <ListItem.Content>
           <ListItem.Title>{`Marker at: ${marker.markerLocation?.latitude?.toFixed(
             5

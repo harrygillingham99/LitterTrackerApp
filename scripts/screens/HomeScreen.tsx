@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { Text } from "react-native";
+import React, { useEffect, useRef } from "react";
+import { Text, ScrollView } from "react-native";
 import { AppHeader } from "../components/nav/Header";
 import { DrawerScreens } from "../types/nav/DrawerScreens";
 import { Routes } from "../types/nav/Routes";
@@ -10,9 +10,11 @@ import { IConfig, LitterTrackerAppClient } from "../services/api/Client";
 import { MapContainer } from "../state/MapState";
 import useSetState from "react-use/lib/useSetState";
 import { MarkerOverlay } from "../components/MarkerOverlay";
-import { ScrollView } from "react-native-gesture-handler";
 import { Loader } from "../components/Loader";
 import { PinRowItem } from "../components/PinRowItem";
+import { Icon } from "react-native-elements";
+import { AccountOverlay } from "../components/AccountOverlay";
+import { useIsFocused } from "@react-navigation/native";
 
 type HomeScreenNavigationProp = DrawerNavigationProp<
   DrawerScreens,
@@ -25,6 +27,7 @@ type HomeScreenProps = {
 
 export interface HomeScreenState {
   loading: boolean;
+  showAccountModal: boolean;
 }
 
 export const HomeScreen = (props: HomeScreenProps) => {
@@ -37,10 +40,14 @@ export const HomeScreen = (props: HomeScreenProps) => {
   } = MapContainer.useContainer();
   const [state, setState] = useSetState<HomeScreenState>({
     loading: false,
+    showAccountModal: false,
   });
+
+  const homeFocused = useIsFocused();
 
   useEffect(() => {
     (async () => {
+      if (appState.user === undefined) return;
       setState({ loading: true });
       const token = (await appState.user.getIdToken()) ?? "not-logged-in";
       const client = new LitterTrackerAppClient(new IConfig(token));
@@ -48,21 +55,29 @@ export const HomeScreen = (props: HomeScreenProps) => {
       setMapState({ markers: markers });
       setState({ loading: false });
     })();
-  }, [appState.user]);
+  }, [appState.user, homeFocused]);
 
   return (
     <>
       <AppHeader
         leftComponentOnPress={props.navigation.toggleDrawer}
         centerComponent={AppLogoIcon}
+        rightComponent={
+          <Icon
+            onPress={() => setState({ showAccountModal: true })}
+            type="feather"
+            name="user"
+            color="white"
+          ></Icon>
+        }
       />
       {state.loading && <Loader />}
-      {!state.loading && (
+      {!state.loading && appState.user !== undefined && (
         <>
-          <ScrollView>
+          <ScrollView style={{ height: "100%" }}>
             {!appState.user.isAnonymous && <Text>Your Pins:</Text>}
             {!appState.user.isAnonymous &&
-              markersForUser().map((marker) => (
+              markersForUser.map((marker) => (
                 <PinRowItem
                   key={`${marker.dataStoreId}-item`}
                   marker={marker}
@@ -72,7 +87,7 @@ export const HomeScreen = (props: HomeScreenProps) => {
               ))}
             <Text>Other Users Pins:</Text>
             {!appState.user.isAnonymous &&
-              otherPeoplesMarkers().map((marker) => (
+              otherPeoplesMarkers.map((marker) => (
                 <PinRowItem
                   key={`${marker.dataStoreId}-item`}
                   marker={marker}
@@ -90,7 +105,11 @@ export const HomeScreen = (props: HomeScreenProps) => {
                 />
               ))}
           </ScrollView>
-          <MarkerOverlay selectedMarker={mapState.selectedMarker} />
+          <MarkerOverlay />
+          <AccountOverlay
+            visible={state.showAccountModal}
+            setHomeState={setState}
+          />
         </>
       )}
     </>

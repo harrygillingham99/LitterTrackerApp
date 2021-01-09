@@ -15,7 +15,6 @@ import { CameraScreen } from "./scripts/screens/CameraScreen";
 import { navigationRef } from "./scripts/types/nav/NavigationRef";
 
 export default function App() {
-
   return (
     <FirebaseAuthProvider firebase={firebase} {...firebaseConfig}>
       <NavigationContainer ref={navigationRef}>
@@ -25,26 +24,32 @@ export default function App() {
               <Drawer.Screen
                 name={Routes.Home}
                 component={HomeScreen}
-                options={{ title: Routes.Home }} />
+                options={{ title: Routes.Home }}
+              />
               <Drawer.Screen
                 name={Routes.MapView}
                 component={MapViewScreen}
-                options={{ title: Routes.MapView }} />
+                options={{ title: "Map View" }}
+              />
               <Drawer.Screen
                 name={Routes.Settings}
                 component={SettingsScreen}
-                options={{ title: Routes.Settings }} />
+                options={{ title: Routes.Settings }}
+              />
               <Drawer.Screen
                 name={Routes.Unauthenticated}
                 component={NotLoggedInScreen}
-                options={{ title: "", gestureEnabled: false }} />
+                options={{ title: "", gestureEnabled: false }}
+              />
               <Drawer.Screen
                 name={Routes.Camera}
                 component={CameraScreen}
-                options={{ title: "", gestureEnabled: false }} />
+                options={{ title: "", gestureEnabled: false }}
+              />
             </Drawer.Navigator>
           </MapContainer.Provider>
         </AppContainer.Provider>
-      </NavigationContainer></FirebaseAuthProvider>
+      </NavigationContainer>
+    </FirebaseAuthProvider>
   );
 }

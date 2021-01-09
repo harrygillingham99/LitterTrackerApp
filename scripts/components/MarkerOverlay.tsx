@@ -14,13 +14,13 @@ import { navigate } from "../types/nav/NavigationRef";
 import { Routes } from "../types/nav/Routes";
 import { GetGoogleImageUrlFromItem } from "../utils/GoogleStorage";
 import Carousel, { Pagination } from "react-native-snap-carousel";
-import { Dimensions, View } from "react-native";
+import { Dimensions, StyleSheet, View } from "react-native";
 import { MapContainer } from "../state/MapState";
 import { AppContainer } from "../state/AppState";
+import { capitalizeFirstLetter } from "../utils/Strings";
+import { AppColour } from "../styles/Colours";
+import { PlaceholderPinImage } from "../utils/Constants";
 
-interface MapOverlayProps {
-  selectedMarker: LitterPin | undefined;
-}
 interface MapOverlayState {
   location: Location;
   loading: boolean;
@@ -28,8 +28,7 @@ interface MapOverlayState {
   visible: boolean;
   carouselIndex?: number;
 }
-export const MarkerOverlay = (props: MapOverlayProps) => {
-  const { selectedMarker } = props;
+export const MarkerOverlay = () => {
   const { setMapState, mapState } = MapContainer.useContainer();
   const { appState } = AppContainer.useContainer();
   const [overlayState, setOverlayState] = useSetState<MapOverlayState>({
@@ -41,33 +40,34 @@ export const MarkerOverlay = (props: MapOverlayProps) => {
   });
   const { lastFetchedMarker, visible, loading, location } = overlayState;
 
+  console.log(JSON.stringify(mapState.selectedMarker))
   //Using an IIFE (Immediately Invoked Function Expression) in any effect which has async actions
   useEffect(() => {
     (async () => {
       if (
-        selectedMarker !== undefined &&
-        selectedMarker !== lastFetchedMarker
+        mapState.selectedMarker !== undefined &&
+        mapState.selectedMarker !== lastFetchedMarker
       ) {
         setOverlayState({ visible: true, loading: true });
         var location = await GetLocationInformationForCoordinate(
           new LatLng({
-            latitude: selectedMarker.markerLocation?.latitude,
-            longitude: selectedMarker.markerLocation?.longitude,
+            latitude: mapState.selectedMarker.markerLocation?.latitude,
+            longitude: mapState.selectedMarker.markerLocation?.longitude,
           })
         );
         setOverlayState({
           location: location,
-          lastFetchedMarker: selectedMarker,
+          lastFetchedMarker: mapState.selectedMarker,
           loading: false,
         });
       } else if (
-        selectedMarker !== undefined &&
-        selectedMarker === lastFetchedMarker
+        mapState.selectedMarker !== undefined &&
+        mapState.selectedMarker === lastFetchedMarker
       ) {
         setOverlayState({ visible: true });
       }
     })();
-  }, [selectedMarker]);
+  }, [mapState.selectedMarker]);
 
   const renderCarouselItem = (item: { item: string; index: number }) => {
     return (
@@ -87,7 +87,7 @@ export const MarkerOverlay = (props: MapOverlayProps) => {
   const onAreaCleanedPress = async () => {
     const token = (await appState.user.getIdToken()) ?? "not-logged-in";
     const client = new LitterTrackerAppClient(new IConfig(token));
-    const pinToUpdate = selectedMarker!;
+    const pinToUpdate = mapState.selectedMarker!;
     pinToUpdate.areaCleaned = true;
     var pinResult = await client.updateLitterPin(pinToUpdate);
     const newMarkerList = mapState.markers.map((marker) => {
@@ -100,17 +100,37 @@ export const MarkerOverlay = (props: MapOverlayProps) => {
     dismissOverlay();
   };
 
+  const markerHasImages =
+    mapState.selectedMarker !== undefined &&
+    mapState.selectedMarker.imageUrls !== undefined &&
+    mapState.selectedMarker.imageUrls[0] !== undefined;
+
   return (
     <Overlay isVisible={visible} onBackdropPress={dismissOverlay}>
       <>
+        <Button
+          containerStyle={{
+            position: "absolute",
+            top: "1%",
+            right: "1%",
+          }}
+          buttonStyle={{ backgroundColor: AppColour }}
+          title="X"
+          onPress={dismissOverlay}
+        ></Button>
         {loading && (
           <Card
             containerStyle={{
               height: Dimensions.get("window").height * 0.8,
               width: Dimensions.get("window").width * 0.8,
+              flex: 1,
+              alignItems: "center",
+              justifyContent: "center",
             }}
           >
-            <Loader />
+            <View>
+              <Loader />
+            </View>
           </Card>
         )}
         {!loading && (
@@ -119,21 +139,26 @@ export const MarkerOverlay = (props: MapOverlayProps) => {
               height: Dimensions.get("window").height * 0.8,
               width: Dimensions.get("window").width * 0.8,
               marginBottom: 10,
+              borderColor: "transparent",
+              shadowColor: "transparent",
+              backgroundColor: "transparent",
             }}
           >
             <Card.Title>{`${location?.parliamentary_constituency} - ${location?.postcode}`}</Card.Title>
             <Card.Divider />
-            {selectedMarker !== undefined &&
-              selectedMarker.imageUrls !== undefined && (
+            {mapState.selectedMarker !== undefined &&
+              mapState.selectedMarker.imageUrls !== undefined &&
+              markerHasImages && (
                 <View
                   style={{
                     alignItems: "center",
                     alignContent: "center",
-                    marginBottom: 5,
+                    marginBottom:
+                      mapState.selectedMarker.imageUrls.length > 1 ? 5 : 15,
                   }}
                 >
                   <Carousel
-                    data={selectedMarker.imageUrls}
+                    data={mapState.selectedMarker.imageUrls}
                     style={{ flex: 1 }}
                     renderItem={renderCarouselItem}
                     itemWidth={200}
@@ -145,7 +170,7 @@ export const MarkerOverlay = (props: MapOverlayProps) => {
                     }
                   ></Carousel>
                   <Pagination
-                    dotsLength={selectedMarker?.imageUrls?.length}
+                    dotsLength={mapState.selectedMarker?.imageUrls?.length}
                     activeDotIndex={overlayState.carouselIndex ?? 0}
                     containerStyle={{
                       backgroundColor: "white",
@@ -164,27 +189,70 @@ export const MarkerOverlay = (props: MapOverlayProps) => {
                   />
                 </View>
               )}
-            {selectedMarker !== undefined &&
-              selectedMarker.weatherData !== undefined && (
-                <>
-                  <Text>{JSON.stringify(selectedMarker.weatherData)}</Text>
-                  <Text>
-                    Area Cleaned:{" "}
-                    {selectedMarker.areaCleaned ? "true" : "false"}
-                  </Text>
-                </>
+            {mapState.selectedMarker !== undefined &&
+              mapState.selectedMarker.imageUrls !== undefined &&
+              !markerHasImages && (
+                <View
+                  style={{
+                    alignItems: "center",
+                    alignContent: "center",
+                    marginBottom: 15,
+                  }}
+                >
+                  <Image
+                    style={{ width: 200, height: 200 }}
+                    source={PlaceholderPinImage}
+                  ></Image>
+                </View>
               )}
+            <Card.Divider />
+            {mapState.selectedMarker !== undefined &&
+              mapState.selectedMarker.weatherData !== undefined && (
+                <View style={{ marginBottom: 10 }}>
+                  <Text style={{ fontSize: 18, marginBottom: 5 }}>
+                    Recorded Temperature:{" "}
+                    {mapState.selectedMarker.weatherData.temperature?.toFixed(
+                      1
+                    )}
+                    °C
+                  </Text>
+                  <Text style={{ fontSize: 18, marginBottom: 5 }}>
+                    Weather Description:{" "}
+                    {capitalizeFirstLetter(
+                      mapState.selectedMarker.weatherData.weatherDescription ??
+                        "no description saved"
+                    )}
+                  </Text>
+                  <Text style={{ fontSize: 18, marginBottom: 5 }}>
+                    Recorded Wind Direction:{" "}
+                    {mapState.selectedMarker.weatherData.windDirection}°
+                  </Text>
+                  <Text style={{ fontSize: 18, marginBottom: 5 }}>
+                    Recorded Wind Speed:{" "}
+                    {mapState.selectedMarker.weatherData.windSpeed} m/s
+                  </Text>
+                  <Text style={{ fontSize: 18, marginBottom: 5 }}>
+                    Area Cleaned:
+                    {mapState.selectedMarker.areaCleaned ? " true" : " false"}
+                  </Text>
+                </View>
+              )}
+            <Card.Divider />
             <Button
               title={"Add Photos"}
+              style={{ marginBottom: 10, backgroundColor: AppColour }}
+              buttonStyle={{ backgroundColor: AppColour }}
               onPress={() => {
-                setOverlayState({ visible: false });
+                setOverlayState({ visible: false  });
                 navigate(Routes.Camera);
               }}
             ></Button>
             <Button
               title={"Area Cleaned"}
+              style={{ backgroundColor: AppColour }}
+              buttonStyle={{ backgroundColor: AppColour }}
               onPress={() => onAreaCleanedPress()}
-              disabled={selectedMarker?.areaCleaned}
+              disabled={mapState.selectedMarker?.areaCleaned}
             ></Button>
           </Card>
         )}

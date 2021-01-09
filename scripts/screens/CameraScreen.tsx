@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { DrawerNavigationProp } from "@react-navigation/drawer";
 import { Button, Slider, Text } from "react-native-elements";
 import { DrawerScreens } from "../types/nav/DrawerScreens";
@@ -11,6 +11,7 @@ import { View, ImageBackground, StyleSheet, Dimensions } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import useSetState from "react-use/lib/useSetState";
 import {
+  LitterPin,
   LitterTrackerAppClient,
   UploadImageRequest,
 } from "../services/api/Client";
@@ -18,6 +19,7 @@ import { IConfig } from "../services/api/ApiClient";
 import { Loader } from "../components/Loader";
 import { AppHeader } from "../components/nav/Header";
 import { AppLogoIcon } from "../components/AppLogoIcon";
+import { useIsFocused } from "@react-navigation/native";
 
 type CameraScreenNavigationProp = DrawerNavigationProp<
   DrawerScreens,
@@ -35,6 +37,7 @@ interface CameraScreenState {
   showPreview: boolean;
   loading: boolean;
   zoom: number;
+  selectedMarker?: LitterPin;
 }
 
 export const CameraScreen = (props: CameraScreenProps) => {
@@ -43,11 +46,12 @@ export const CameraScreen = (props: CameraScreenProps) => {
   let cameraRef = useRef<Camera | null>(null);
   const [cameraState, setCameraState] = useSetState<CameraScreenState>({
     permission: false,
-    cameraType: Camera.Constants.Type.front,
+    cameraType: Camera.Constants.Type.back,
     image: undefined,
     showPreview: false,
     loading: false,
     zoom: 0,
+    selectedMarker: undefined,
   });
   const {
     permission,
@@ -56,17 +60,26 @@ export const CameraScreen = (props: CameraScreenProps) => {
     showPreview,
     loading,
     zoom,
+    selectedMarker,
   } = cameraState;
 
   const resetCameraState = () => {
     setCameraState({
-      cameraType: Camera.Constants.Type.front,
+      cameraType: Camera.Constants.Type.back,
       image: undefined,
       showPreview: false,
       loading: false,
       zoom: 0,
+      selectedMarker: undefined,
     });
   };
+
+  const cameraFocused = useIsFocused();
+
+  useEffect(() => {
+    setCameraState({ selectedMarker: mapState.selectedMarker });
+    setMapState({ selectedMarker: undefined });
+  }, [cameraFocused]);
 
   const captureImage = async () => {
     if (!permission) return;
@@ -81,11 +94,11 @@ export const CameraScreen = (props: CameraScreenProps) => {
     const fileName = await client.uploadImage(
       new UploadImageRequest({
         uploadedByUid: appState.user.uid,
-        markerDatastoreId: mapState.selectedMarker?.dataStoreId ?? 1,
+        markerDatastoreId: selectedMarker?.dataStoreId ?? 1,
         base64Image: image!.base64!,
       })
     );
-    const pinToUpdate = mapState!.selectedMarker!;
+    const pinToUpdate = selectedMarker!;
     pinToUpdate.imageUrls === undefined
       ? (pinToUpdate.imageUrls = new Array<string>(fileName))
       : pinToUpdate.imageUrls.push(fileName);
@@ -107,7 +120,7 @@ export const CameraScreen = (props: CameraScreenProps) => {
       },
       selectedMarker: undefined,
     });
-    props.navigation.navigate("Home");
+    props.navigation.jumpTo(Routes.Home);
   };
 
   const onConfirmPhoto = () => {
@@ -147,7 +160,7 @@ export const CameraScreen = (props: CameraScreenProps) => {
       </>
     );
   }
-  if (showPreview && image) {
+  if (showPreview && image && cameraFocused) {
     return (
       <ImageBackground
         source={{ uri: image.uri }}
@@ -187,7 +200,7 @@ export const CameraScreen = (props: CameraScreenProps) => {
                   fontSize: 20,
                 }}
               >
-                Re-take
+                Re-Take
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -206,7 +219,7 @@ export const CameraScreen = (props: CameraScreenProps) => {
                   fontSize: 20,
                 }}
               >
-                save photo
+                Save Photo
               </Text>
             </TouchableOpacity>
           </View>
@@ -233,7 +246,7 @@ export const CameraScreen = (props: CameraScreenProps) => {
           title="Close"
           onPress={() => {
             resetCameraState();
-            props.navigation.navigate("Home");
+            props.navigation.jumpTo(Routes.Home);
           }}
         ></Button>
         <Button

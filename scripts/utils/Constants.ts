@@ -8,3 +8,21 @@ export enum MapTypes {
   hybrid = "hybrid",
   terrain = "terrain",
 }
+
+export const PlaceholderPinImage = require("../../assets/tree.png");
+
+export const LogInScreenImage = require("../../assets/stock.png");
+
+export const InitialMapState = {
+  location: {
+    latitude: 50.72123099459833,
+    longitude: -1.8765086308121681,
+    latitudeDelta: 0.0717708440848881,
+    longitudeDelta: 0.0630741566419597,
+  },
+  markers: [],
+  mapLoading: false,
+  mapType: MapTypes.standard,
+  selectedMarker: undefined,
+  showInfoOverlay: false
+}

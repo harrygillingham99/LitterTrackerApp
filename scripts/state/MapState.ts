@@ -5,6 +5,7 @@ import { LitterPin } from "../services/api/Client";
 import firebase from "firebase";
 import { GetData, StoreData } from "../storage/Storage";
 import { MapTypeKey } from "../storage/StorageKeys";
+import { InitialMapState } from "../utils/Constants";
 
 interface Reigon {
   latitude: number;
@@ -19,21 +20,11 @@ export interface MapState {
   mapLoading: boolean;
   mapType: MapTypes;
   selectedMarker?: LitterPin;
+  showInfoOverlay: boolean;
 }
 
 const useMapState = () => {
-  const [mapState, setMap] = useSetState<MapState>({
-    location: {
-      latitude: 50.72123099459833,
-      longitude: -1.8765086308121681,
-      latitudeDelta: 0.0717708440848881,
-      longitudeDelta: 0.0630741566419597,
-    },
-    markers: [],
-    mapLoading: false,
-    mapType: "standard",
-    selectedMarker: undefined,
-  });
+  const [mapState, setMap] = useSetState<MapState>(InitialMapState);
 
   const setMapState = (
     patch: Partial<MapState> | ((prevState: MapState) => Partial<MapState>)
@@ -57,14 +48,14 @@ const useMapState = () => {
     })();
   };
 
-  const markersForUser = () =>
+  const markersForUser = 
     mapState.markers.filter(
       (marker) =>
         marker.createdByUid === currentUserUid ||
         marker.lastUpdatedByUid === currentUserUid
     );
 
-  const otherPeoplesMarkers = () =>
+  const otherPeoplesMarkers =
     mapState.markers.filter(
       (marker) =>
         marker.createdByUid !== currentUserUid &&

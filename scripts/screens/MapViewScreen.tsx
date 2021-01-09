@@ -9,7 +9,7 @@ import MapView, { MapEvent, Marker } from "react-native-maps";
 import { AppContainer } from "../state/AppState";
 import useEffectOnce from "react-use/lib/useEffectOnce";
 import * as Location from "expo-location";
-import { Button, Text } from "react-native-elements";
+import { Button, Icon, Text } from "react-native-elements";
 import { Loader } from "../components/Loader";
 import {
   IConfig,
@@ -19,7 +19,8 @@ import {
 } from "../services/api/Client";
 import { MapContainer } from "../state/MapState";
 import { MarkerOverlay } from "../components/MarkerOverlay";
-import { getPinColour, HeadingColour } from "../styles/Colours";
+import { getPinColour, AppColour } from "../styles/Colours";
+import { MapInfoOverlay } from "../components/MapInformationOverlay";
 
 type MapViewScreenNavigationProp = DrawerNavigationProp<
   DrawerScreens,
@@ -44,7 +45,7 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
   const OnCenterMapPress = () => {
     (async () => {
       setMapState({ mapLoading: true });
-      let location = await Location.getCurrentPositionAsync({});
+      let location = await Location.getCurrentPositionAsync({accuracy: Location.LocationAccuracy.Highest});
       setMapState({
         location: {
           latitude: location.coords.latitude,
@@ -97,6 +98,7 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
       <AppHeader
         leftComponentOnPress={props.navigation.toggleDrawer}
         centerComponent={AppLogoIcon}
+        rightComponent={<Icon onPress={() => setMapState({showInfoOverlay: true})} type="feather" name="info" color="white"></Icon>}
       />
       {!mapState.mapLoading && permission && (
         <>
@@ -149,17 +151,27 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
               />
             ))}
             <Button
+              style={{ position: "absolute", top: "5%", left: "5%" }}
               containerStyle={{
                 position: "absolute",
                 top: "5%",
                 left: "5%",
               }}
-              buttonStyle={{ backgroundColor: HeadingColour }}
+              buttonStyle={{
+                backgroundColor: AppColour,
+                position: "absolute",
+                top: "5%",
+                left: "5%",
+              }}
+              loadingStyle={{ position: "absolute",
+              top: "5%",
+              left: "5%",}}
               title="Center"
               onPress={() => OnCenterMapPress()}
             ></Button>
           </MapView>
-          <MarkerOverlay selectedMarker={mapState.selectedMarker} />
+          <MarkerOverlay />
+          <MapInfoOverlay />
         </>
       )}
       {mapState.mapLoading && <Loader />}

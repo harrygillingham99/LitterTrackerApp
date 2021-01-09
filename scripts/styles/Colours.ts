@@ -1,5 +1,12 @@
-import { LitterPin } from "../services/api/Client"
+import { LitterPin } from "../services/api/Client";
 
-export const HeadingColour = '#008000'
+export const AppColour = "#008000";
 
-export const getPinColour = (marker: LitterPin) => marker.imageUrls === undefined || (marker.imageUrls !== undefined && marker.imageUrls.length === 0) ? "black" : marker.areaCleaned ? "green" : "blue";
+//pins with no images are black, pins that need clearing are blue and cleared pins are green
+export const getPinColour = (marker: LitterPin) =>
+  marker.imageUrls === undefined ||
+  (marker.imageUrls !== undefined && marker.imageUrls.length === 0)
+    ? "black"
+    : marker.areaCleaned
+    ? "green"
+    : "blue";
