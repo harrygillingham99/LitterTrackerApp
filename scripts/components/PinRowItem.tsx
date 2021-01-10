@@ -80,7 +80,7 @@ export const PinRowItem = (props: PinRowItemProps) => {
   };
 
   return (
-    <Swipeable renderRightActions={RightActions}>
+    <Swipeable renderRightActions={RightActions} enabled={marker.createdByUid === appState.user?.uid ?? false}>
       <ListItem
         key={`pinRowItem-${marker.dataStoreId}`}
         bottomDivider
