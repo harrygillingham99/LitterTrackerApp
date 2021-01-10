@@ -14,12 +14,13 @@ import { navigate } from "../types/nav/NavigationRef";
 import { Routes } from "../types/nav/Routes";
 import { GetGoogleImageUrlFromItem } from "../utils/GoogleStorage";
 import Carousel, { Pagination } from "react-native-snap-carousel";
-import { Dimensions, StyleSheet, View } from "react-native";
+import { Dimensions, StyleSheet, TouchableOpacity, View } from "react-native";
 import { MapContainer } from "../state/MapState";
 import { AppContainer } from "../state/AppState";
 import { capitalizeFirstLetter } from "../utils/Strings";
 import { AppColour } from "../styles/Colours";
 import { PlaceholderPinImage } from "../utils/Constants";
+import ImageView from "react-native-image-viewing";
 
 interface MapOverlayState {
   location: Location;
@@ -27,6 +28,7 @@ interface MapOverlayState {
   lastFetchedMarker: LitterPin;
   visible: boolean;
   carouselIndex?: number;
+  imageToView?: string;
 }
 export const MarkerOverlay = () => {
   const { setMapState, mapState } = MapContainer.useContainer();
@@ -37,10 +39,17 @@ export const MarkerOverlay = () => {
     lastFetchedMarker: null!,
     visible: false,
     carouselIndex: undefined,
+    imageToView: undefined,
   });
-  const { lastFetchedMarker, visible, loading, location } = overlayState;
+  const {
+    lastFetchedMarker,
+    visible,
+    loading,
+    location,
+    carouselIndex,
+    imageToView,
+  } = overlayState;
 
-  console.log(JSON.stringify(mapState.selectedMarker))
   //Using an IIFE (Immediately Invoked Function Expression) in any effect which has async actions
   useEffect(() => {
     (async () => {
@@ -70,12 +79,17 @@ export const MarkerOverlay = () => {
   }, [mapState.selectedMarker]);
 
   const renderCarouselItem = (item: { item: string; index: number }) => {
+    const sourceUrl = GetGoogleImageUrlFromItem(item.item);
     return (
-      <Image
-        key={item.index}
-        style={{ width: 200, height: 200 }}
-        source={{ uri: GetGoogleImageUrlFromItem(item.item) }}
-      ></Image>
+      <TouchableOpacity
+        onPress={() => setOverlayState({ imageToView: sourceUrl })}
+      >
+        <Image
+          key={item.index}
+          style={{ width: 200, height: 200 }}
+          source={{ uri: sourceUrl }}
+        ></Image>
+      </TouchableOpacity>
     );
   };
 
@@ -101,6 +115,7 @@ export const MarkerOverlay = () => {
   };
 
   const markerHasImages =
+    mapState !== undefined &&
     mapState.selectedMarker !== undefined &&
     mapState.selectedMarker.imageUrls !== undefined &&
     mapState.selectedMarker.imageUrls[0] !== undefined;
@@ -171,7 +186,7 @@ export const MarkerOverlay = () => {
                   ></Carousel>
                   <Pagination
                     dotsLength={mapState.selectedMarker?.imageUrls?.length}
-                    activeDotIndex={overlayState.carouselIndex ?? 0}
+                    activeDotIndex={carouselIndex ?? 0}
                     containerStyle={{
                       backgroundColor: "white",
                       paddingTop: 10,
@@ -243,7 +258,7 @@ export const MarkerOverlay = () => {
               style={{ marginBottom: 10, backgroundColor: AppColour }}
               buttonStyle={{ backgroundColor: AppColour }}
               onPress={() => {
-                setOverlayState({ visible: false  });
+                setOverlayState({ visible: false });
                 navigate(Routes.Camera);
               }}
             ></Button>
@@ -255,6 +270,14 @@ export const MarkerOverlay = () => {
               disabled={mapState.selectedMarker?.areaCleaned}
             ></Button>
           </Card>
+        )}
+        {imageToView !== undefined && (
+          <ImageView
+            images={[{ uri: imageToView }]}
+            imageIndex={0}
+            visible={imageToView !== undefined}
+            onRequestClose={() => setOverlayState({ imageToView: undefined })}
+          />
         )}
       </>
     </Overlay>

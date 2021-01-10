@@ -365,6 +365,53 @@ export class LitterTrackerAppClient extends AuthorizedApiBase {
         }
         return Promise.resolve<string>(<any>null);
     }
+
+    /**
+     * @return Success
+     */
+    getUserStatistics(): Promise<UserStatistics> {
+        let url_ = this.baseUrl + "/app/statistics";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ = <RequestInit>{
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetUserStatistics(_response);
+        });
+    }
+
+    protected processGetUserStatistics(response: Response): Promise<UserStatistics> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = UserStatistics.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized Request", status, _responseText, _headers);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            return throwException("Server Error", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<UserStatistics>(<any>null);
+    }
 }
 
 export abstract class DataStoreItem implements IDataStoreItem {
@@ -600,6 +647,46 @@ export interface IUploadImageRequest {
     base64Image?: string | undefined;
     uploadedByUid?: string | undefined;
     markerDatastoreId?: number;
+}
+
+export class UserStatistics implements IUserStatistics {
+    areasCleared?: number;
+    pinsCreated?: number;
+
+    constructor(data?: IUserStatistics) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.areasCleared = _data["areasCleared"];
+            this.pinsCreated = _data["pinsCreated"];
+        }
+    }
+
+    static fromJS(data: any): UserStatistics {
+        data = typeof data === 'object' ? data : {};
+        let result = new UserStatistics();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["areasCleared"] = this.areasCleared;
+        data["pinsCreated"] = this.pinsCreated;
+        return data; 
+    }
+}
+
+export interface IUserStatistics {
+    areasCleared?: number;
+    pinsCreated?: number;
 }
 
 export interface FileResponse {

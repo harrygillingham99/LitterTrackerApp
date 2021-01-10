@@ -1,13 +1,9 @@
+import { LocationAccuracy } from "expo-location";
+import { MAP_TYPES } from "react-native-maps";
+
 export const DefaultLatDelta = 0.0018774168909985178;
 
 export const DefaultLongDelta = 0.0015409290790560082;
-
-export enum MapTypes {
-  standard = "standard",
-  satellite = "satellite",
-  hybrid = "hybrid",
-  terrain = "terrain",
-}
 
 export const PlaceholderPinImage = require("../../assets/tree.png");
 
@@ -22,7 +18,8 @@ export const InitialMapState = {
   },
   markers: [],
   mapLoading: false,
-  mapType: MapTypes.standard,
+  mapType: MAP_TYPES.STANDARD,
   selectedMarker: undefined,
-  showInfoOverlay: false
+  showInfoOverlay: false,
+  locationAccuracy: LocationAccuracy.Balanced
 }

@@ -36,6 +36,7 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
     mapState,
     setMapState,
     tryGetSavedMapType,
+    tryGetSavedLocationAccuracy
   } = MapContainer.useContainer();
 
   const [permission, setPermission] = useState<boolean>(false);
@@ -60,6 +61,7 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
 
   useEffectOnce(() => {
     tryGetSavedMapType();
+    tryGetSavedLocationAccuracy();
     (async () => {
       const { status } = await Location.requestPermissionsAsync();
       setPermission(status === "granted");

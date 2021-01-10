@@ -55,7 +55,7 @@ export const HomeScreen = (props: HomeScreenProps) => {
       setMapState({ markers: markers });
       setState({ loading: false });
     })();
-  }, [appState.user, homeFocused]);
+  }, [appState.user, homeFocused, mapState.selectedMarker]);
 
   return (
     <>

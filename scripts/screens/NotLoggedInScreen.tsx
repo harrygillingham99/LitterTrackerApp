@@ -97,7 +97,9 @@ export const NotLoggedInScreen = (
   return (
     <>
       <AppHeader
-        centerComponent={<Text>Sign In</Text>}
+        centerComponent={
+          <Text style={{ color: "white" }}>Sign In or Create an Account</Text>
+        }
         hideLeftComponent={true}
       />
       <Tile

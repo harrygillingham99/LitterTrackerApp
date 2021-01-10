@@ -77,8 +77,14 @@ export const CameraScreen = (props: CameraScreenProps) => {
   const cameraFocused = useIsFocused();
 
   useEffect(() => {
+    if(cameraFocused)
+    {
     setCameraState({ selectedMarker: mapState.selectedMarker });
-    setMapState({ selectedMarker: undefined });
+    setMapState({ selectedMarker: undefined });}
+    else{
+      resetCameraState();
+      setMapState({selectedMarker: undefined})
+    }
   }, [cameraFocused]);
 
   const captureImage = async () => {
@@ -109,7 +115,6 @@ export const CameraScreen = (props: CameraScreenProps) => {
       }
       return marker;
     });
-    resetCameraState();
     setMapState({
       markers: newMarkerList,
       location: {

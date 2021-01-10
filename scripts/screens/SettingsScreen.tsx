@@ -1,8 +1,6 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Text } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
-import { MapTypes } from "../utils/Constants";
-import { ListItem } from "react-native-elements";
 import * as Maps from "react-native-maps";
 import { MapContainer } from "../state/MapState";
 import useEffectOnce from "react-use/lib/useEffectOnce";
@@ -11,6 +9,7 @@ import { DrawerScreens } from "../types/nav/DrawerScreens";
 import { Routes } from "../types/nav/Routes";
 import { DrawerNavigationProp } from "@react-navigation/drawer";
 import { AppLogoIcon } from "../components/AppLogoIcon";
+import { LocationAccuracy } from "expo-location";
 
 type SettingsScreenNavigationProp = DrawerNavigationProp<
   DrawerScreens,
@@ -18,70 +17,82 @@ type SettingsScreenNavigationProp = DrawerNavigationProp<
 >;
 
 type SettingsScreenProps = {
-  navigation: SettingsScreenNavigationProp
-}
+  navigation: SettingsScreenNavigationProp;
+};
 export const SettingsScreen = (props: SettingsScreenProps) => {
   const {
     mapState,
     setMapState,
     saveMapTypeSelection,
     tryGetSavedMapType,
+    tryGetSavedLocationAccuracy,
+    saveLocationAccuracy,
   } = MapContainer.useContainer();
-  const GetMapType = (text: React.ReactText) => {
-    switch (text) {
-      case MapTypes.hybrid:
-        return Maps.MAP_TYPES.HYBRID;
-      case MapTypes.satellite:
-        return Maps.MAP_TYPES.SATELLITE;
-      case MapTypes.standard:
-        return Maps.MAP_TYPES.STANDARD;
-      case MapTypes.terrain:
-        return Maps.MAP_TYPES.TERRAIN;
-      default:
-        return Maps.MAP_TYPES.STANDARD;
-    }
-  };
+
   useEffectOnce(() => {
     tryGetSavedMapType();
+    tryGetSavedLocationAccuracy();
   });
+
+  const mapTypeLabels = [
+    { label: "Standard", value: Maps.MAP_TYPES.STANDARD },
+    { label: "Hybrid", value: Maps.MAP_TYPES.HYBRID },
+    { label: "Satellite", value: Maps.MAP_TYPES.SATELLITE },
+    { label: "Terrain", value: Maps.MAP_TYPES.TERRAIN },
+  ];
+
+  const locationAccuracyLabels = [
+    { label: "Balanced", value: LocationAccuracy.Balanced },
+    { label: "Best For Navigation", value: LocationAccuracy.BestForNavigation },
+    { label: "High", value: LocationAccuracy.High },
+    { label: "Highest", value: LocationAccuracy.Highest },
+    { label: "Low", value: LocationAccuracy.Low },
+    { label: "Lowest", value: LocationAccuracy.Lowest },
+  ];
   return (
-    <><AppHeader
-      leftComponentOnPress={props.navigation.toggleDrawer}
-      centerComponent={AppLogoIcon} />
-      <View style={styles.container}>
-        <Text>{mapState.mapType}</Text>
-        <ListItem>
-          <DropDownPicker
-            items={[
-              { label: MapTypes.standard, value: MapTypes.standard },
-              { label: MapTypes.hybrid, value: MapTypes.hybrid },
-              { label: MapTypes.satellite, value: MapTypes.satellite },
-              { label: MapTypes.terrain, value: MapTypes.terrain },
-            ]}
+    <>
+      <AppHeader
+        leftComponentOnPress={props.navigation.toggleDrawer}
+        centerComponent={AppLogoIcon}
+      />
+      <Text>Map Type: {mapState.mapType}</Text>
+      <DropDownPicker
+            key={1}
+            items={mapTypeLabels}
             defaultValue={mapState.mapType}
             onChangeItem={({ value }) => {
-              const mapType = GetMapType(value);
-              saveMapTypeSelection(mapType);
+              saveMapTypeSelection(value as Maps.MapTypes);
               setMapState({
-                mapType: mapType,
+                mapType: value as Maps.MapTypes,
               });
-            } }
+            }}
             containerStyle={{ height: 40, width: 150 }}
             style={{ backgroundColor: "#fafafa" }}
             itemStyle={{
               justifyContent: "flex-start",
             }}
-            dropDownStyle={{ backgroundColor: "#fafafa" }} />
-        </ListItem>
-      </View></>
+            dropDownStyle={{ backgroundColor: "#fafafa" }}
+          />
+      <Text>Location Accuracy: {locationAccuracyLabels.find(x => x.value === mapState.locationAccuracy)?.label ?? "Unknown"}</Text>
+      <DropDownPicker
+        key={2}
+        items={locationAccuracyLabels}
+        defaultValue={mapState.locationAccuracy}
+        onChangeItem={({ value }) => {
+          saveLocationAccuracy(value as LocationAccuracy);
+          setMapState({
+            locationAccuracy: value as LocationAccuracy,
+          });
+        }}
+        containerStyle={{ height: 40, width: 150 }}
+        style={{ backgroundColor: "#fafafa" }}
+        itemStyle={{
+          justifyContent: "flex-start",
+        }}
+        dropDownStyle={{ backgroundColor: "#fafafa" }}
+      />
+    </>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});
+

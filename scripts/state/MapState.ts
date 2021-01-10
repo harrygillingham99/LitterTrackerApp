@@ -4,8 +4,9 @@ import { MapTypes } from "react-native-maps";
 import { LitterPin } from "../services/api/Client";
 import firebase from "firebase";
 import { GetData, StoreData } from "../storage/Storage";
-import { MapTypeKey } from "../storage/StorageKeys";
+import { LocationAccuracyKey, MapTypeKey } from "../storage/StorageKeys";
 import { InitialMapState } from "../utils/Constants";
+import { LocationAccuracy } from "expo-location";
 
 interface Reigon {
   latitude: number;
@@ -21,6 +22,7 @@ export interface MapState {
   mapType: MapTypes;
   selectedMarker?: LitterPin;
   showInfoOverlay: boolean;
+  locationAccuracy: LocationAccuracy;
 }
 
 const useMapState = () => {
@@ -42,9 +44,23 @@ const useMapState = () => {
     })();
   };
 
+  const tryGetSavedLocationAccuracy = () => {
+    (async () =>{
+      const savedItem = await GetData<LocationAccuracy>(LocationAccuracyKey);
+      if(savedItem === null) return;
+      setMap({locationAccuracy: savedItem});
+    })();
+  }
+
   const saveMapTypeSelection = (type: MapTypes) => {
     (async () => {
       await StoreData<MapTypes>(type, MapTypeKey);
+    })();
+  };
+
+  const saveLocationAccuracy = (choice: LocationAccuracy) => {
+    (async () => {
+      await StoreData<LocationAccuracy>(choice, LocationAccuracyKey);
     })();
   };
 
@@ -69,6 +85,8 @@ const useMapState = () => {
     otherPeoplesMarkers,
     tryGetSavedMapType,
     saveMapTypeSelection,
+    tryGetSavedLocationAccuracy,
+    saveLocationAccuracy
   };
 };
 
