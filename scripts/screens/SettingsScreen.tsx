@@ -17,7 +17,13 @@ import { Routes } from "../types/nav/Routes";
 import { DrawerNavigationProp } from "@react-navigation/drawer";
 import { AppLogoIcon } from "../components/AppLogoIcon";
 import { LocationAccuracy } from "expo-location";
-import { saveMapTypeSelection, saveLocationAccuracy } from "../storage/SettingsStorage";
+import {
+  saveMapTypeSelection,
+  saveLocationAccuracy,
+  saveCameraQuality,
+} from "../storage/SettingsStorage";
+import { Slider } from "react-native-elements";
+import { AppContainer } from "../state/AppState";
 
 type SettingsScreenNavigationProp = DrawerNavigationProp<
   DrawerScreens,
@@ -34,8 +40,15 @@ export const SettingsScreen = (props: SettingsScreenProps) => {
     tryGetSettingsItemsFromStorage,
   } = MapContainer.useContainer();
 
+  const {
+    cameraQuality,
+    setCameraQuality,
+    tryGetQualityFromStorage,
+  } = AppContainer.useContainer();
+
   useEffectOnce(() => {
     tryGetSettingsItemsFromStorage();
+    tryGetQualityFromStorage();
   });
 
   const mapTypeOptions = [
@@ -61,24 +74,29 @@ export const SettingsScreen = (props: SettingsScreenProps) => {
       />
       <Text>Map Type: {mapState.mapType}</Text>
       <DropDownPicker
-            key={1}
-            items={mapTypeOptions}
-            defaultValue={mapState.mapType}
-            onChangeItem={({ value }) => {
-              saveMapTypeSelection(value as Maps.MapTypes);
-              setMapState({
-                mapType: value as Maps.MapTypes,
-              });
-            }}
-            containerStyle={{ height: 40, width: 150 }}
-            style={{ backgroundColor: "#fafafa" }}
-            itemStyle={{
-              justifyContent: "flex-start",
-            }}
-            dropDownStyle={{ backgroundColor: "#fafafa" }}
-            zIndex={5000}
-          />
-      <Text>Location Accuracy: {locationAccuracyOptions.find(x => x.value === mapState.locationAccuracy)?.label ?? "Unknown"}</Text>
+        key={1}
+        items={mapTypeOptions}
+        defaultValue={mapState.mapType}
+        onChangeItem={({ value }) => {
+          saveMapTypeSelection(value as Maps.MapTypes);
+          setMapState({
+            mapType: value as Maps.MapTypes,
+          });
+        }}
+        containerStyle={{ height: 40, width: 150 }}
+        style={{ backgroundColor: "#fafafa" }}
+        itemStyle={{
+          justifyContent: "flex-start",
+        }}
+        dropDownStyle={{ backgroundColor: "#fafafa" }}
+        zIndex={5000}
+      />
+      <Text>
+        Location Accuracy:{" "}
+        {locationAccuracyOptions.find(
+          (x) => x.value === mapState.locationAccuracy
+        )?.label ?? "Unknown"}
+      </Text>
       <DropDownPicker
         key={2}
         items={locationAccuracyOptions}
@@ -97,8 +115,18 @@ export const SettingsScreen = (props: SettingsScreenProps) => {
         dropDownStyle={{ backgroundColor: "#fafafa" }}
         zIndex={4000}
       />
+      <Text>Camera Quality: </Text>
+      <Slider
+        value={cameraQuality}
+        onValueChange={(value) => {
+          saveCameraQuality(value);
+          setCameraQuality(value);
+        }}
+        minimumValue={0}
+        maximumValue={1}
+        step={0.05}
+        style={{ width: 200 }}
+      />
     </>
   );
 };
-
-

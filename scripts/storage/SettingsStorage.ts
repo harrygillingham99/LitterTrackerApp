@@ -13,6 +13,8 @@ export const MapTypeKey = "MapType";
 
 export const LocationAccuracyKey = "LocationAccuracy";
 
+export const CameraQualityKey = "CameraQuality"
+
 export const tryGetSavedMapType = (
   setMap: (
     patch: Partial<MapState> | ((prevState: MapState) => Partial<MapState>)
@@ -48,3 +50,18 @@ export const saveLocationAccuracy = (choice: LocationAccuracy) => {
     await StoreData<LocationAccuracy>(choice, LocationAccuracyKey);
   })();
 };
+
+export const tryGetSavedCameaQuality = (setCameraQuality: React.Dispatch<React.SetStateAction<number>> ) =>{
+  (async () =>{
+    const savedItem = await GetData<number>(CameraQualityKey);
+    if (savedItem === null) return;
+    setCameraQuality(savedItem);
+  })();
+}
+
+export const saveCameraQuality = (quality: number) => {
+  (async () => {
+    await StoreData<number>(quality, CameraQualityKey);
+  })();
+};
+

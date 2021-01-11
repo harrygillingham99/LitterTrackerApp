@@ -48,7 +48,11 @@ interface CameraScreenState {
 
 export const CameraScreen = (props: CameraScreenProps) => {
   const { mapState, setMapState } = MapContainer.useContainer();
-  const { appState } = AppContainer.useContainer();
+  const {
+    appState,
+    tryGetQualityFromStorage,
+    cameraQuality,
+  } = AppContainer.useContainer();
   let cameraRef = useRef<Camera | null>(null);
   const [cameraState, setCameraState] = useSetState<CameraScreenState>({
     permission: false,
@@ -83,19 +87,20 @@ export const CameraScreen = (props: CameraScreenProps) => {
   const cameraFocused = useIsFocused();
 
   useEffect(() => {
-    if(cameraFocused)
-    {
-    setCameraState({ selectedMarker: mapState.selectedMarker });
-    setMapState({ selectedMarker: undefined });}
-    else{
+    if (cameraFocused) {
+      setCameraState({ selectedMarker: mapState.selectedMarker });
+      setMapState({ selectedMarker: undefined });
+    } else {
       resetCameraState();
-      setMapState({selectedMarker: undefined})
+      setMapState({ selectedMarker: undefined });
     }
   }, [cameraFocused]);
 
+  useEffectOnce(() => tryGetQualityFromStorage());
+
   const captureImage = async () => {
     if (!permission) return;
-    const photo = await cameraRef.current?.takePictureAsync({ base64: true });
+    const photo = await cameraRef.current?.takePictureAsync({ base64: true, quality: cameraQuality });
     setCameraState({ showPreview: true, image: photo });
   };
 
