@@ -1,3 +1,9 @@
+/* 
+  SecureStorage.ts
+  A typed generic wrapper for expo-secure-storage to allow for easy storage and retrieval of any interface or type.
+  Not currently used in this app but I had planned to and didn't want to lose this... 
+*/
+
 import * as SecureStore from "expo-secure-store";
 
 export const IsAvailable = async () => await SecureStore.isAvailableAsync();

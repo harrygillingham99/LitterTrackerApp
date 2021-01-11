@@ -1,10 +1,19 @@
+/* 
+  MapState.ts
+  This is the global map state container used to handle all of the Map View's state. 
+  Allowing it to be manipulated throughout the whole app.
+  Unstated-next makes global state straightforward and makes custom hooks and functions to transform the state easy to implement. 
+*/
+
 import useSetState from "react-use/lib/useSetState";
 import { createContainer } from "unstated-next";
 import { MapTypes } from "react-native-maps";
 import { LitterPin } from "../services/api/Client";
 import firebase from "firebase";
-import { GetData, StoreData } from "../storage/Storage";
-import { LocationAccuracyKey, MapTypeKey } from "../storage/StorageKeys";
+import {
+  tryGetSavedLocationAccuracy,
+  tryGetSavedMapType,
+} from "../storage/SettingsStorage";
 import { InitialMapState } from "../utils/Constants";
 import { LocationAccuracy } from "expo-location";
 
@@ -36,57 +45,29 @@ const useMapState = () => {
 
   const currentUserUid = firebase.auth().currentUser?.uid;
 
-  const tryGetSavedMapType = () => {
-    (async () => {
-      const savedType = await GetData<MapTypes>(MapTypeKey);
-      if (savedType === null) return;
-      setMap({ mapType: savedType });
-    })();
+  const tryGetSettingsItemsFromStorage = () => {
+    tryGetSavedLocationAccuracy(setMap);
+    tryGetSavedMapType(setMap);
   };
 
-  const tryGetSavedLocationAccuracy = () => {
-    (async () =>{
-      const savedItem = await GetData<LocationAccuracy>(LocationAccuracyKey);
-      if(savedItem === null) return;
-      setMap({locationAccuracy: savedItem});
-    })();
-  }
+  const markersForUser = mapState.markers.filter(
+    (marker) =>
+      marker.createdByUid === currentUserUid ||
+      marker.lastUpdatedByUid === currentUserUid
+  );
 
-  const saveMapTypeSelection = (type: MapTypes) => {
-    (async () => {
-      await StoreData<MapTypes>(type, MapTypeKey);
-    })();
-  };
-
-  const saveLocationAccuracy = (choice: LocationAccuracy) => {
-    (async () => {
-      await StoreData<LocationAccuracy>(choice, LocationAccuracyKey);
-    })();
-  };
-
-  const markersForUser = 
-    mapState.markers.filter(
-      (marker) =>
-        marker.createdByUid === currentUserUid ||
-        marker.lastUpdatedByUid === currentUserUid
-    );
-
-  const otherPeoplesMarkers =
-    mapState.markers.filter(
-      (marker) =>
-        marker.createdByUid !== currentUserUid &&
-        marker.lastUpdatedByUid !== currentUserUid
-    );
+  const otherPeoplesMarkers = mapState.markers.filter(
+    (marker) =>
+      marker.createdByUid !== currentUserUid &&
+      marker.lastUpdatedByUid !== currentUserUid
+  );
 
   return {
     mapState,
     setMapState,
     markersForUser,
     otherPeoplesMarkers,
-    tryGetSavedMapType,
-    saveMapTypeSelection,
-    tryGetSavedLocationAccuracy,
-    saveLocationAccuracy
+    tryGetSettingsItemsFromStorage,
   };
 };
 

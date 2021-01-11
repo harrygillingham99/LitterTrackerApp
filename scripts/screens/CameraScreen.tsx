@@ -1,3 +1,9 @@
+/* 
+  CameraScreen.tsx
+  The camera screen for the application. Allows a picture to be taken then 
+  either re taken or confirmed where it is then uploaded to the API and assigned to the litter pin.
+*/
+
 import React, { useEffect, useRef } from "react";
 import { DrawerNavigationProp } from "@react-navigation/drawer";
 import { Button, Slider, Text } from "react-native-elements";
@@ -17,7 +23,7 @@ import {
 } from "../services/api/Client";
 import { IConfig } from "../services/api/ApiClient";
 import { Loader } from "../components/Loader";
-import { AppHeader } from "../components/nav/Header";
+import { AppHeader } from "../components/nav/AppHeader";
 import { AppLogoIcon } from "../components/AppLogoIcon";
 import { useIsFocused } from "@react-navigation/native";
 

@@ -1,6 +1,12 @@
-import React, { useEffect, useRef } from "react";
+/* 
+  HomeScreen.tsx
+  The home screen for the application. Logged in users will have their 
+  pins at the top of the list. Guest users will have a listing of all pins.
+*/
+
+import React, { useEffect } from "react";
 import { Text, ScrollView } from "react-native";
-import { AppHeader } from "../components/nav/Header";
+import { AppHeader } from "../components/nav/AppHeader";
 import { DrawerScreens } from "../types/nav/DrawerScreens";
 import { Routes } from "../types/nav/Routes";
 import { DrawerNavigationProp } from "@react-navigation/drawer";
@@ -30,7 +36,7 @@ export interface HomeScreenState {
   showAccountModal: boolean;
 }
 
-export const HomeScreen = (props: HomeScreenProps) => {
+export const HomeScreen = React.memo((props: HomeScreenProps) => {
   const { appState } = AppContainer.useContainer();
   const {
     markersForUser,
@@ -114,4 +120,4 @@ export const HomeScreen = (props: HomeScreenProps) => {
       )}
     </>
   );
-};
+});

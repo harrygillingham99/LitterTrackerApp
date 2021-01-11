@@ -1,15 +1,23 @@
+/* 
+  SettingsScreen.tsx
+  A simple settings screen with room for expansion. Currently allows the map type and 
+  location accuracy to be toggled (less accurate = more battery life according to expo docs).
+  These settings are stored in AsyncStorage so will persist when the app closes.
+*/
+
 import React from "react";
 import { Text } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import * as Maps from "react-native-maps";
 import { MapContainer } from "../state/MapState";
 import useEffectOnce from "react-use/lib/useEffectOnce";
-import { AppHeader } from "../components/nav/Header";
+import { AppHeader } from "../components/nav/AppHeader";
 import { DrawerScreens } from "../types/nav/DrawerScreens";
 import { Routes } from "../types/nav/Routes";
 import { DrawerNavigationProp } from "@react-navigation/drawer";
 import { AppLogoIcon } from "../components/AppLogoIcon";
 import { LocationAccuracy } from "expo-location";
+import { saveMapTypeSelection, saveLocationAccuracy } from "../storage/SettingsStorage";
 
 type SettingsScreenNavigationProp = DrawerNavigationProp<
   DrawerScreens,
@@ -23,25 +31,21 @@ export const SettingsScreen = (props: SettingsScreenProps) => {
   const {
     mapState,
     setMapState,
-    saveMapTypeSelection,
-    tryGetSavedMapType,
-    tryGetSavedLocationAccuracy,
-    saveLocationAccuracy,
+    tryGetSettingsItemsFromStorage,
   } = MapContainer.useContainer();
 
   useEffectOnce(() => {
-    tryGetSavedMapType();
-    tryGetSavedLocationAccuracy();
+    tryGetSettingsItemsFromStorage();
   });
 
-  const mapTypeLabels = [
+  const mapTypeOptions = [
     { label: "Standard", value: Maps.MAP_TYPES.STANDARD },
     { label: "Hybrid", value: Maps.MAP_TYPES.HYBRID },
     { label: "Satellite", value: Maps.MAP_TYPES.SATELLITE },
     { label: "Terrain", value: Maps.MAP_TYPES.TERRAIN },
   ];
 
-  const locationAccuracyLabels = [
+  const locationAccuracyOptions = [
     { label: "Balanced", value: LocationAccuracy.Balanced },
     { label: "Best For Navigation", value: LocationAccuracy.BestForNavigation },
     { label: "High", value: LocationAccuracy.High },
@@ -58,7 +62,7 @@ export const SettingsScreen = (props: SettingsScreenProps) => {
       <Text>Map Type: {mapState.mapType}</Text>
       <DropDownPicker
             key={1}
-            items={mapTypeLabels}
+            items={mapTypeOptions}
             defaultValue={mapState.mapType}
             onChangeItem={({ value }) => {
               saveMapTypeSelection(value as Maps.MapTypes);
@@ -72,11 +76,12 @@ export const SettingsScreen = (props: SettingsScreenProps) => {
               justifyContent: "flex-start",
             }}
             dropDownStyle={{ backgroundColor: "#fafafa" }}
+            zIndex={5000}
           />
-      <Text>Location Accuracy: {locationAccuracyLabels.find(x => x.value === mapState.locationAccuracy)?.label ?? "Unknown"}</Text>
+      <Text>Location Accuracy: {locationAccuracyOptions.find(x => x.value === mapState.locationAccuracy)?.label ?? "Unknown"}</Text>
       <DropDownPicker
         key={2}
-        items={locationAccuracyLabels}
+        items={locationAccuracyOptions}
         defaultValue={mapState.locationAccuracy}
         onChangeItem={({ value }) => {
           saveLocationAccuracy(value as LocationAccuracy);
@@ -90,6 +95,7 @@ export const SettingsScreen = (props: SettingsScreenProps) => {
           justifyContent: "flex-start",
         }}
         dropDownStyle={{ backgroundColor: "#fafafa" }}
+        zIndex={4000}
       />
     </>
   );

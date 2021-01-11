@@ -1,3 +1,9 @@
+/* 
+  Storage.ts
+  A typed generic wrapper for react-native-async-storage/async-storage. 
+  Allows easy storage and retrieval of typed objects. 
+*/
+
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export async function StoreData<T>(value: T, key: string): Promise<void> {

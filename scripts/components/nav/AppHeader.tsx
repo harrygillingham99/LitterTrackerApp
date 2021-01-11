@@ -1,14 +1,15 @@
+/* 
+  AppHeader.tsx
+  This is the app's header component, with the ability to pass in 
+  different components and onPress functions depending on what screen it is used in.  
+*/
+
 import * as React from "react";
 import { Header, Icon } from "react-native-elements";
 import { AppColour } from "../../styles/Colours";
 
-/* 
-This is a custom header component used by the the screens in this application, 
-it allows for custom sub components to be passed in from the parent. 
-*/
-
 interface AppHeaderProps {
-  leftComponentOnPress?: () => void; //a function reference to either go back or open the drawer, depending on whats passed in
+  leftComponentOnPress?: () => void;
   centerComponent: React.ReactElement;
   showBack?: boolean;
   hideLeftComponent?: boolean;
@@ -18,7 +19,7 @@ interface AppHeaderProps {
 export const AppHeader = ({
   leftComponentOnPress,
   centerComponent,
-  showBack = false, // optional, used on the detailed beach view, to be able to return to the previous easily
+  showBack = false,
   hideLeftComponent = false,
   rightComponent,
 }: AppHeaderProps): JSX.Element => {

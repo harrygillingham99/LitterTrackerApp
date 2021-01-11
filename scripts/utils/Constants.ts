@@ -1,3 +1,8 @@
+/* 
+  Constants.ts
+  Used to hold all the values that don't change that i don't know where else to put.
+*/
+
 import { LocationAccuracy } from "expo-location";
 import { MAP_TYPES } from "react-native-maps";
 

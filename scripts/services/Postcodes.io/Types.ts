@@ -1,4 +1,8 @@
-//Generated using http://json2ts.com/ based on https://postcodes.io/ example response documentation
+/* 
+  Types.ts
+  Holds all of the response types used for the request. Generated 
+  using http://json2ts.com/ based on https://postcodes.io/ example response documentation
+*/
 
 export interface Geolocation {
     longitude: number;

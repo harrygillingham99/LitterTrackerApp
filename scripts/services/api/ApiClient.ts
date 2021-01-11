@@ -1,6 +1,11 @@
 import { ApiUrl } from "../config/ApiConfig";
 
 export class IConfig {
+  /* 
+    ApiClient.ts
+    This is the base classes for the NSwag generated ApiClient. Has overrides for transformOptions and getBaseUrl to allow me to instantiate a client and
+    inject firebase authorization tokens into the request header for the back end to then verify and get my own baseUrl stored in a config file.
+  */
   constructor(token: string) {
     this.JwtToken = token;
   }

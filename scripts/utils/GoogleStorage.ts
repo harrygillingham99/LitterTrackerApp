@@ -1,3 +1,9 @@
+/* 
+  GoogleStorage.ts
+  Used to create full image urls from the image file names stored in the LitterPin object. All
+  images are uploaded via the app's API and stored centrally in a Google cloud storage bucket.
+*/
+
 const GoogleStorageUrlTemplate = "https://storage.googleapis.com/litter-tracker.appspot.com/"
 
 export const GetGoogleImageUrlsFromList = (imageUrls?: string[]) => {

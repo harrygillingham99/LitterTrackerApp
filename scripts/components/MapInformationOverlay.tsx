@@ -1,3 +1,8 @@
+/* 
+  MapInformationOverlay.tsx
+  A simple informational overlay used in the map screen to provide extra required information.
+*/
+
 import React from "react";
 import { Dimensions, View } from "react-native";
 import { Card, Icon, Overlay, Text } from "react-native-elements";

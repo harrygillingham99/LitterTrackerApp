@@ -1,4 +1,4 @@
-import { Dimensions, StyleProp, ViewStyle } from "react-native";
+import { StyleProp, ViewStyle } from "react-native";
 
 export const Container : StyleProp<ViewStyle> = {
     justifyContent: 'flex-start', //Centered vertically

@@ -1,6 +1,7 @@
 /* 
-This is the way to use a strongly typed navigator with typescript, giving proper intellisense. 
-This type is used as an annotation in Drawer.tsx when calling createDrawerNavigator()
+  DrawerScreens.ts
+  The type used to define all the routes in the application. 
+  Used in createDrawerNavigator<T> to make TypeScript happy.
 */
 
 export type DrawerScreens = {

@@ -1,3 +1,8 @@
+/* 
+  Validation.ts
+  Handles all of the field validation for the NotLoggedInScreen.
+*/
+
 export const EmailIsValid = (email: string) =>
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 

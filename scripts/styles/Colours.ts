@@ -1,3 +1,8 @@
+/* 
+  Colours.ts
+  A small utility file used to store and resolve colours for things.
+*/
+
 import { LitterPin } from "../services/api/Client";
 
 export const AppColour = "#008000";

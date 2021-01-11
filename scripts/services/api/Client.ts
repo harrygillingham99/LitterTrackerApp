@@ -9,6 +9,9 @@
 
 import { ApiUrl } from "../config/ApiConfig";
 export class IConfig {
+  /* 
+    ApiClient.ts
+  */
   constructor(token: string) {
     this.JwtToken = token;
   }

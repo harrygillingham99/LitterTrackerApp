@@ -1,6 +1,13 @@
+/* 
+  MapViewScreen.tsx
+  The map view screen for the application. Allows for new litter pins to be placed on map press. 
+  Has a centre button to locate the map back to the user and on marker press will show the MarkerOverlay as the home screen does.
+  Pins will also be coloured depending on their state.
+*/
+
 import React, { useState } from "react";
 import { Alert, Dimensions, StyleProp, ViewStyle } from "react-native";
-import { AppHeader } from "../components/nav/Header";
+import { AppHeader } from "../components/nav/AppHeader";
 import { DrawerNavigationProp } from "@react-navigation/drawer";
 import { DrawerScreens } from "../types/nav/DrawerScreens";
 import { Routes } from "../types/nav/Routes";
@@ -35,8 +42,7 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
   const {
     mapState,
     setMapState,
-    tryGetSavedMapType,
-    tryGetSavedLocationAccuracy
+    tryGetSettingsItemsFromStorage,
   } = MapContainer.useContainer();
 
   const [permission, setPermission] = useState<boolean>(false);
@@ -46,7 +52,9 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
   const OnCenterMapPress = () => {
     (async () => {
       setMapState({ mapLoading: true });
-      let location = await Location.getCurrentPositionAsync({accuracy: Location.LocationAccuracy.Highest});
+      let location = await Location.getCurrentPositionAsync({
+        accuracy: Location.LocationAccuracy.Highest,
+      });
       setMapState({
         location: {
           latitude: location.coords.latitude,
@@ -60,8 +68,7 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
   };
 
   useEffectOnce(() => {
-    tryGetSavedMapType();
-    tryGetSavedLocationAccuracy();
+    tryGetSettingsItemsFromStorage();
     (async () => {
       const { status } = await Location.requestPermissionsAsync();
       setPermission(status === "granted");
@@ -100,7 +107,14 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
       <AppHeader
         leftComponentOnPress={props.navigation.toggleDrawer}
         centerComponent={AppLogoIcon}
-        rightComponent={<Icon onPress={() => setMapState({showInfoOverlay: true})} type="feather" name="info" color="white"></Icon>}
+        rightComponent={
+          <Icon
+            onPress={() => setMapState({ showInfoOverlay: true })}
+            type="feather"
+            name="info"
+            color="white"
+          ></Icon>
+        }
       />
       {!mapState.mapLoading && permission && (
         <>
@@ -116,7 +130,7 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
               e.persist();
               Alert.alert(
                 "Creating Litter Pin",
-                "Are you sure you want to create a new pin ",
+                "Are you sure you want to create a new pin?",
                 [
                   {
                     text: "Yes",
@@ -124,9 +138,7 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
                   },
                   {
                     text: "Cancel",
-                    onPress: () => {
-                      return;
-                    },
+                    onPress: () => e.preventDefault(),
                     style: "cancel",
                   },
                 ],
@@ -136,7 +148,7 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
           >
             {mapState.markers?.map((marker, i) => (
               <Marker
-                key={`pin-${i}`}
+                key={`litterPin-${i}`}
                 pinColor={getPinColour(marker)}
                 coordinate={{
                   latitude:
@@ -153,21 +165,26 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
               />
             ))}
             <Button
-              style={{ position: "absolute", top: "5%", left: "5%" }}
+              style={{
+                position: "absolute",
+                top: "5%",
+                left: "5%",
+                zIndex: 5000,
+              }}
               containerStyle={{
                 position: "absolute",
                 top: "5%",
                 left: "5%",
+                zIndex: 5000,
               }}
               buttonStyle={{
                 backgroundColor: AppColour,
                 position: "absolute",
                 top: "5%",
                 left: "5%",
+                zIndex: 5000,
               }}
-              loadingStyle={{ position: "absolute",
-              top: "5%",
-              left: "5%",}}
+              titleStyle={{ zIndex: 5000 }}
               title="Center"
               onPress={() => OnCenterMapPress()}
             ></Button>

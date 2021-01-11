@@ -1,3 +1,9 @@
+/* 
+  Fetch.ts
+  A generic typed fetch wrapper used to make strongly typed web requests.
+  Expanded to allow optional body and headers. Useful for passing 'Content-Type' etc headers.
+*/
+
 export default class Fetch {
     static async HttpRequest<T>(url: string, method: "GET" | "POST", body?: string, headers?: Headers): Promise<T> {
       return new Promise((resolve) => {

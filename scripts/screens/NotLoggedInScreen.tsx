@@ -1,6 +1,13 @@
+/* 
+  NotLoggedInScreen.tsx
+  The entry point for the application. Allows users to either continue as guest, log in or create a new email account. 
+  This is all handled through firebase. Even if the user chooses to remain anon we can still validate requests on the API side
+  as they will still have a firebase uid and auth token.
+*/
+
 import React from "react";
 import { Button, Input, Text, Tile } from "react-native-elements";
-import { AppHeader } from "../components/nav/Header";
+import { AppHeader } from "../components/nav/AppHeader";
 import { DrawerScreens } from "../types/nav/DrawerScreens";
 import { Routes } from "../types/nav/Routes";
 import { DrawerNavigationProp } from "@react-navigation/drawer";

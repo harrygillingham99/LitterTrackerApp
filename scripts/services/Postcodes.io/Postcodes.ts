@@ -1,3 +1,8 @@
+/* 
+  Postcodes.ts
+  Used to make a request to postcodes.io to resolve the location for a latitude and longitude.
+*/
+
 import { LatLng } from "../api/Client";
 import Fetch from "../Fetch";
 import { PostcodeForCoordinateUrl } from "./Constants";
@@ -28,6 +33,6 @@ export const GetLocationInformationForCoordinate = async (
     headers
   );
   
-  //its a horrible nested object, wasn't really a way around this without spending way too much time on it
+  //its a horrible nested response object, wasn't really a way around this without spending way too much time on it
   return result.result[0].result[0];
 };

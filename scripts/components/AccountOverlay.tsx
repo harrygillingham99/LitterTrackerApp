@@ -1,3 +1,9 @@
+/* 
+  AccountOverlay.tsx
+  A custom overlay component used on the home screen to display 
+  logged in users statistics and allow them to sign out of the app.
+*/
+
 import React, { useState } from "react";
 import { Overlay, Card, Button, Text } from "react-native-elements";
 import { AppContainer } from "../state/AppState";

@@ -1,4 +1,11 @@
-import React, { useEffect } from "react";
+/* 
+  MarkerOverlay.tsx
+  Overlay component used in the home and MapView screen to display information about a marker.
+  This will resolve the location for the marker with an API call and also has swipable images with an full size image viewer.
+  Also has functions to allow users to add photos to a pin and to mark the area as cleaned.
+*/
+
+import React from "react";
 import { Overlay, Button, Card, Image, Text } from "react-native-elements";
 import {
   LitterPin,
@@ -14,13 +21,14 @@ import { navigate } from "../types/nav/NavigationRef";
 import { Routes } from "../types/nav/Routes";
 import { GetGoogleImageUrlFromItem } from "../utils/GoogleStorage";
 import Carousel, { Pagination } from "react-native-snap-carousel";
-import { Dimensions, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Dimensions, TouchableOpacity, View } from "react-native";
 import { MapContainer } from "../state/MapState";
 import { AppContainer } from "../state/AppState";
 import { capitalizeFirstLetter } from "../utils/Strings";
 import { AppColour } from "../styles/Colours";
 import { PlaceholderPinImage } from "../utils/Constants";
 import ImageView from "react-native-image-viewing";
+import useEffectOnce from "react-use/lib/useEffectOnce";
 
 interface MapOverlayState {
   location: Location;
@@ -51,7 +59,7 @@ export const MarkerOverlay = () => {
   } = overlayState;
 
   //Using an IIFE (Immediately Invoked Function Expression) in any effect which has async actions
-  useEffect(() => {
+  useEffectOnce(() => {
     (async () => {
       if (
         mapState.selectedMarker !== undefined &&
@@ -76,7 +84,7 @@ export const MarkerOverlay = () => {
         setOverlayState({ visible: true });
       }
     })();
-  }, [mapState.selectedMarker]);
+  });
 
   const renderCarouselItem = (item: { item: string; index: number }) => {
     const sourceUrl = GetGoogleImageUrlFromItem(item.item);

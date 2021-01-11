@@ -1,3 +1,8 @@
+/* 
+  Firebase.ts
+  Houses the firebaseConfig for the application and all of the methods used to handle user account actions.
+*/
+
 import firebase from "firebase";
 
 export const firebaseConfig = {

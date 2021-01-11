@@ -1,3 +1,9 @@
+/* 
+  PinRowItem.tsx
+  Row item used in the home screen. Has breif information for each pin. 
+  Also has the ability to be swiped left to delete the pin, providing you are the owner.
+*/
+
 import React from "react";
 import { Animated, TouchableOpacity } from "react-native";
 import { View } from "react-native";

@@ -1,3 +1,9 @@
+/* 
+  App.tsx
+  The main entry point for the application. This contains all of the unstated-next container 
+  providers as well as the provider for firebase and the apps navigation.
+*/
+
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { Routes } from "./scripts/types/nav/Routes";
