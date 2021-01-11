@@ -18,7 +18,7 @@ import {
   ErrorMessages,
   PasswordIsValid,
 } from "../utils/Validation";
-import { Container } from "../styles/Container";
+import { Container } from "../styles/Styles";
 import {
   createEmailAccount,
   signInAnon,

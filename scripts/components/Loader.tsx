@@ -5,7 +5,7 @@
 
 import React from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
-import { LoaderContainer } from "../styles/Container";
+import { LoaderContainer } from "../styles/Styles";
 
 export const Loader = () => (
   <View style={LoaderContainer}>
