@@ -49,7 +49,7 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
 
   const { appState } = AppContainer.useContainer();
 
-  const OnCenterMapPress = () => {
+  const onCenterMapPress = () => {
     (async () => {
       setMapState({ mapLoading: true });
       let location = await Location.getCurrentPositionAsync({
@@ -79,7 +79,7 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
     })();
   });
 
-  const OnMapPress = async (event: MapEvent) => {
+  const onMapPress = async (event: MapEvent) => {
     const token = await appState.user.getIdToken();
     const client = new LitterTrackerAppClient(new IConfig(token));
     const newPin = await client.createNewLitterPin(
@@ -134,7 +134,7 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
                 [
                   {
                     text: "Yes",
-                    onPress: () => OnMapPress(e),
+                    onPress: () => onMapPress(e),
                   },
                   {
                     text: "Cancel",
@@ -186,7 +186,7 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
               }}
               titleStyle={{ zIndex: 5000 }}
               title="Center"
-              onPress={() => OnCenterMapPress()}
+              onPress={() => onCenterMapPress()}
             ></Button>
           </MapView>
           <MarkerOverlay />
