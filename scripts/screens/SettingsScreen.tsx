@@ -84,6 +84,7 @@ export const SettingsScreen = (props: SettingsScreenProps) => {
           });
         }}
         containerStyle={{ height: 40, width: 150 }}
+        labelStyle={{ color: "black" }}
         style={{ backgroundColor: "#fafafa" }}
         itemStyle={{
           justifyContent: "flex-start",
@@ -112,6 +113,7 @@ export const SettingsScreen = (props: SettingsScreenProps) => {
         itemStyle={{
           justifyContent: "flex-start",
         }}
+        labelStyle={{ color: "black" }}
         dropDownStyle={{ backgroundColor: "#fafafa" }}
         zIndex={4000}
       />
