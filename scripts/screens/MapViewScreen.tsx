@@ -28,6 +28,7 @@ import { MapContainer } from "../state/MapState";
 import { MarkerOverlay } from "../components/MarkerOverlay";
 import { getPinColour, AppColour } from "../styles/Colours";
 import { MapInfoOverlay } from "../components/MapInformationOverlay";
+import { MapStyles } from "../styles/Styles";
 
 type MapViewScreenNavigationProp = DrawerNavigationProp<
   DrawerScreens,
@@ -120,7 +121,7 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
         <>
           <MapView
             provider={"google"}
-            style={BeachMapStyles}
+            style={MapStyles}
             initialRegion={mapState.location}
             showsUserLocation={true}
             mapType={mapState.mapType}
@@ -199,11 +200,4 @@ export const MapViewScreen = (props: MapViewScreenProps) => {
       )}
     </>
   );
-};
-
-export const BeachMapStyles: StyleProp<ViewStyle> = {
-  width: Dimensions.get("window").width,
-  height: Dimensions.get("window").height,
-  flex: 1,
-  alignSelf: "center",
 };
