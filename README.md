@@ -3,9 +3,9 @@
 Received 90/100
 
 A React Native Litter Tracker Application.
--Uses firebase, for token auth
--Uses LitterTrackerAPI for all operations
--NSwag CLI for client generation based off the OpenAPI doc served up by the API
+- Uses firebase, for token auth
+- Uses LitterTrackerAPI for all operations
+- NSwag CLI for client generation based off the OpenAPI doc served up by the API
 
 ### `npm start`
 
